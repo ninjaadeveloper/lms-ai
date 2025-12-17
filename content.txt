@@ -1,0 +1,142 @@
+Ahh 👍 samajh gaya — Laravel nahi, CORE PHP.
+No worries, same idea, bas simpler + believable in 1 week, aur management ko phir bhi impress karega.
+
+✅ Final Project (Core PHP)
+Smart Mini LMS (Core PHP + MySQL + AI Assistance)
+
+Stack
+
+Core PHP (procedural or light MVC)
+
+MySQL
+
+Bootstrap
+
+Simple AI API (OpenAI / similar)
+
+Duration: 1 week
+Audience: Center Management
+
+🎯 Management-Friendly Goal
+
+“A lightweight LMS built in Core PHP with AI-assisted summaries to support trainers and management.”
+
+🔹 CORE FEATURES (1-Week Scope)
+1. Authentication & Roles
+
+Admin
+
+Trainer
+
+Student
+
+👉 Session-based auth (simple & stable)
+
+2. Course & Batch Management
+
+Create / edit courses
+
+Create batches
+
+Assign trainers
+
+Enroll students
+
+3. Lessons & Content
+
+Lesson title & description
+
+Upload PDF / add video link
+
+Course-wise lessons
+
+4. Attendance (Basic)
+
+Trainer marks present/absent
+
+Auto attendance %
+
+5. Quizzes (Minimal)
+
+MCQs only
+
+Auto-check answers
+
+Store scores
+
+🤖 AI FEATURES (Small but Powerful)
+✅ AI Feature 1: AI Course Description Generator
+
+Admin clicks button → AI generates:
+
+Course overview
+
+Learning outcomes
+
+👉 Saves trainer effort
+
+✅ AI Feature 2: AI Student Performance Summary
+
+Input:
+
+Attendance %
+
+Quiz average
+
+AI Output:
+
+“Student shows good understanding but attendance needs improvement.”
+
+👉 Very management-friendly
+
+✅ AI Feature 3: AI Feedback Summary
+
+Students submit text feedback
+
+AI summarizes positives & issues
+
+🗂️ Suggested Folder Structure (Simple MVC-ish)
+/lms
+ ├── config/
+ │    └── db.php
+ ├── auth/
+ │    ├── login.php
+ │    └── logout.php
+ ├── admin/
+ │    ├── courses.php
+ │    ├── batches.php
+ │    └── ai_course_summary.php
+ ├── trainer/
+ │    ├── attendance.php
+ │    ├── quizzes.php
+ │    └── ai_student_summary.php
+ ├── student/
+ │    ├── lessons.php
+ │    └── feedback.php
+ ├── ai/
+ │    └── ai_service.php
+ ├── assets/
+ └── index.php
+
+
+Management ko yeh organized lagega.
+
+🗄️ Minimal Database Tables
+
+users
+
+courses
+
+batches
+
+batch_students
+
+lessons
+
+attendance
+
+quizzes
+
+quiz_results
+
+feedback
