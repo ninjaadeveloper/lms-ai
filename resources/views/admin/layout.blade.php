@@ -45,7 +45,7 @@
         </div>
         <ul class="navbar-nav navbar-right">
           <li class="dropdown"><a href="#" data-toggle="dropdown"
-              class="nav-link dropdown-toggle nav-link-lg nav-link-user"> <img alt="image" src="assets/img/user.png"
+              class="nav-link dropdown-toggle nav-link-lg nav-link-user"> <img alt="image" src="{{ asset('assets//img/user.png') }}"
                 class="user-img-radious-style"> <span class="d-sm-none d-lg-inline-block"></span></a>
             <div class="dropdown-menu dropdown-menu-right pullDown">
               <div class="dropdown-title">Hello Sarah Smith</div>
@@ -66,64 +66,89 @@
       <div class="main-sidebar sidebar-style-2">
         <aside id="sidebar-wrapper">
           <div class="sidebar-brand">
-            <a href="#"> <img alt="image" src="assets/img/logo.png" class="header-logo" /> <span
+            <a href="#"> <img alt="image" src="{{ asset('assets//img/logo.png') }}" class="header-logo" /> <span
                 class="logo-name">LMS - AI</span>
             </a>
           </div>
-          <ul class="sidebar-menu">
-            <li class="menu-header">Dashboard</li>
-            <li class="dropdown">
-              <a href="#" class="nav-link"><i data-feather="monitor"></i><span>Dashboard</span></a>
-            </li>
-            <li class="dropdown">
-              <a href="#" class="menu-toggle nav-link has-dropdown"><i
-                  data-feather="users"></i><span>Users</span></a>
-              <ul class="dropdown-menu">
-                <li><a class="nav-link" href="#">All Users</a></li>
-                <li><a class="nav-link" href="#">Add User</a></li>
-                <li><a class="nav-link" href="#">Trainers</a></li>
-                <li><a class="nav-link" href="#">Students</a></li>
-              </ul>
-            </li>
-              <li class="dropdown">
-              <a href="#" class="menu-toggle nav-link has-dropdown"><i
-                  data-feather="book"></i><span>Courses</span></a>
-              <ul class="dropdown-menu">
-                <li><a class="nav-link" href="#">Course List</a></li>
-                <li><a class="nav-link" href="#">Add Course</a></li>
-              </ul>
-            </li>
-             <li class="dropdown">
-              <a href="#" class="menu-toggle nav-link has-dropdown"><i
-                  data-feather="book"></i><span>Quizzes</span></a>
-              <ul class="dropdown-menu">
-                <li><a class="nav-link" href="#">Quiz List</a></li>
-                <li><a class="nav-link" href="#">Add Quiz (Course-wise MCQ)</a></li>
-                <li><a class="nav-link" href="#">Quiz Results</a></li>
-              </ul>
-            </li>
-            <li class="dropdown">
-              <a href="#" class="menu-toggle nav-link has-dropdown"><i
-                  data-feather="copy"></i><span>Reports</span></a>
-              <ul class="dropdown-menu">
-                <li><a class="nav-link" href="#">User Reports</a></li>
-              </ul>
-            </li>
-            <li class="dropdown">
-              <a href="#" class="menu-toggle nav-link has-dropdown"><i
-                  data-feather="settings"></i><span>Settings</span></a>
-              <ul class="dropdown-menu">
-                <li><a class="nav-link" href="#">Profile</a></li>
-                <li><a class="nav-link" href="#">Change Password</a></li>
-              </ul>
-            </li>
-             <li class="dropdown">
-              <a href="#" class="nav-link"><i data-feather="cpu"></i><span>Ai Assistant</span></a>
-            </li>
-              <li class="dropdown">
-              <a href="#" class="nav-link"><i data-feather="log-out"></i><span>Logout</span></a>
-            </li>
-          </ul>
+        <ul class="sidebar-menu">
+
+  <!-- Dashboard -->
+  <li class="menu-header">Dashboard</li>
+  <li class="dropdown">
+    <a href="{{ route('admin.dashboard') }}" class="nav-link">
+      <i data-feather="monitor"></i><span>Dashboard</span>
+    </a>
+  </li>
+
+  <!-- Users -->
+  <li class="dropdown">
+    <a href="#" class="menu-toggle nav-link has-dropdown">
+      <i data-feather="users"></i><span>Users</span>
+    </a>
+    <ul class="dropdown-menu">
+      <li><a class="nav-link" href="{{ route('users.index') }}">All Users</a></li>
+      <li><a class="nav-link" href="{{ route('users.create') }}">Add User</a></li>
+      <li><a class="nav-link" href="{{ route('users.index') }}">Trainers</a></li>
+      <li><a class="nav-link" href="{{ route('users.index') }}">Students</a></li>
+    </ul>
+  </li>
+
+  <!-- Courses -->
+  <li class="dropdown">
+    <a href="#" class="menu-toggle nav-link has-dropdown">
+      <i data-feather="book"></i><span>Courses</span>
+    </a>
+    <ul class="dropdown-menu">
+      <li><a class="nav-link" href="{{ route('courses.index') }}">Course List</a></li>
+      <li><a class="nav-link" href="{{ route('courses.create') }}">Add Course</a></li>
+    </ul>
+  </li>
+
+  <!-- Quizzes -->
+  <li class="dropdown">
+    <a href="#" class="menu-toggle nav-link has-dropdown">
+      <i data-feather="book-open"></i><span>Quizzes</span>
+    </a>
+    <ul class="dropdown-menu">
+      <li><a class="nav-link" href="{{ route('quizzes.index') }}">Quiz List</a></li>
+      <li><a class="nav-link" href="{{ route('quizzes.create') }}">Add Quiz</a></li>
+      <li><a class="nav-link" href="{{ route('quizzes.index') }}">Quiz Results</a></li>
+    </ul>
+  </li>
+
+  <!-- AI Assistant -->
+  <li class="dropdown">
+    <a href="{{ route('ai.studentPerformance') }}" class="nav-link">
+      <i data-feather="cpu"></i><span>AI Assistant</span>
+    </a>
+  </li>
+
+  <!-- Feedback -->
+  <li class="dropdown">
+    <a href="{{ route('feedback.index') }}" class="nav-link">
+      <i data-feather="message-square"></i><span>Feedback</span>
+    </a>
+  </li>
+
+  <!-- Settings -->
+  <li class="dropdown">
+    <a href="#" class="menu-toggle nav-link has-dropdown">
+      <i data-feather="settings"></i><span>Settings</span>
+    </a>
+    <ul class="dropdown-menu">
+      <li><a class="nav-link" href="#">Profile</a></li>
+      <li><a class="nav-link" href="#">Change Password</a></li>
+    </ul>
+  </li>
+
+  <!-- Logout -->
+  <li class="dropdown">
+    <a href="#" class="nav-link">
+      <i data-feather="log-out"></i><span>Logout</span>
+    </a>
+  </li>
+
+         </ul>
         </aside>
       </div>
 
