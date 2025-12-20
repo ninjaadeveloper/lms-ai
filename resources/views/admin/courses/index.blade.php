@@ -17,49 +17,52 @@
             @endif
 
             @if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        {{ session('error') }}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-@endif
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            @endif
 
             <div class="row">
                 <div class="col-12 col-md-12 col-lg-12">
                     <div class="card">
                         <div class="card-header">
-                            <h4>All Users</h4>
+                            <h4>All Courses</h4>
+                            {{-- <a href="{{ route('courses.create') }}" class="btn btn-primary float-right">Add Course</a> --}}
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
                                 <table class="table table-striped table-md">
                                     <tr>
                                         <th>#</th>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Role</th>
+                                        <th>Title</th>
+                                        <th>Description</th>
+                                        {{-- <th>AI Description</th> --}}
+                                        <th>Duration (hrs)</th>
                                         <th>Status</th>
                                         <th>Action</th>
                                     </tr>
 
-                                    @forelse($users as $key => $user)
+                                    @forelse($courses as $key => $course)
                                     <tr>
                                         <td>{{ $key + 1 }}</td>
-                                        <td>{{ $user->name }}</td>
-                                        <td>{{ $user->email }}</td>
-                                        <td>{{ ucfirst(strtolower($user->role)) }}</td>
+                                        <td>{{ $course->title }}</td>
+                                        <td>{{ Str::limit($course->description, 50) }}</td>
+                                        {{-- <td>{{ Str::limit($course->ai_description, 50) }}</td> --}}
+                                        <td>{{ $course->duration_hours ?? '-' }}</td>
                                         <td>
-                                            @if($user->status)
+                                            @if($course->status)
                                                 <div class="badge badge-success">Active</div>
                                             @else
-                                                <div class="badge badge-danger">Not Active</div>
+                                                <div class="badge badge-danger">Inactive</div>
                                             @endif
                                         </td>
                                         <td>
-                                            <a href="{{ route('users.show', $user->id) }}" class="btn btn-info">Details</a>
-                                            <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary">Edit</a>
-                                            <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display:inline;">
+                                             <a href="{{ route('courses.show', $course->id) }}" class="btn btn-info">Detail</a>
+                                            <a href="{{ route('courses.edit', $course->id) }}" class="btn btn-primary">Edit</a>
+                                            <form action="{{ route('courses.destroy', $course->id) }}" method="POST" style="display:inline;">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
@@ -68,7 +71,7 @@
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="6" class="text-center">No users found</td>
+                                        <td colspan="7" class="text-center">No courses found</td>
                                     </tr>
                                     @endforelse
 

@@ -88,8 +88,8 @@
     <ul class="dropdown-menu">
       <li><a class="nav-link" href="{{ route('users.index') }}">All Users</a></li>
       <li><a class="nav-link" href="{{ route('users.create') }}">Add User</a></li>
-      <li><a class="nav-link" href="{{ route('users.index') }}">Trainers</a></li>
-      <li><a class="nav-link" href="{{ route('users.index') }}">Students</a></li>
+      <li><a class="nav-link" href="{{ route('users.trainers') }}">Trainers</a></li>
+      <li><a class="nav-link" href="{{ route('users.students') }}">Students</a></li>
     </ul>
   </li>
 

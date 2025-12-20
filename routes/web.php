@@ -17,9 +17,15 @@ Route::get('/', [DashboardController::class, 'index'])
 // Dashboard
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->name('admin.dashboard');
+// Trainers
+Route::get('/users/trainers', [UserController::class, 'trainers'])->name('users.trainers');
+
+//Students
+Route::get('/users/students', [UserController::class, 'students'])->name('users.students');
 
 // Users
 Route::resource('/users', UserController::class);
+
 
 // Courses
 Route::resource('/courses', CourseController::class);

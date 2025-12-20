@@ -58,10 +58,12 @@ class UserController extends Controller
      * Display the specified resource.
      * GET /users/{id}
      */
-    public function show(string $id)
+    public function show($id)
     {
-        return view('admin.users.show', compact('id'));
+        $user = User::findOrFail($id);
+        return view('admin.users.show', compact('user'));
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -69,17 +71,42 @@ class UserController extends Controller
      */
     public function edit(string $id)
     {
-        return view('admin.users.edit', compact('id'));
+        $user = User::findOrFail($id);
+        return view('admin.users.edit', compact('user'));
     }
 
     /**
      * Update the specified resource in storage.
      * PUT /users/{id}
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        return redirect()->route('users.index');
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|string|min:8',
+            'role'     => 'required|in:admin,trainer,student',
+            'phone'    => 'nullable|string|max:20',
+            'status'   => 'nullable|boolean',
+        ]);
+
+        $user->name  = $validated['name'];
+        $user->email = $validated['email'];
+        $user->role  = $validated['role'];
+        $user->phone = $validated['phone'] ?? null;
+        $user->status = $request->has('status') ? 1 : 0;
+
+        if (!empty($validated['password'])) {
+            $user->password = bcrypt($validated['password']);
+        }
+
+        $user->save();
+
+        return redirect()->route('users.index')->with('success', 'User updated successfully!');
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -87,6 +114,23 @@ class UserController extends Controller
      */
     public function destroy(string $id)
     {
-        return redirect()->route('users.index');
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return redirect()->route('users.index')->with('success', 'User deleted successfully!');
+    }
+
+    // Trainers List
+    public function trainers()
+    {
+        $trainers = User::where('role', 'trainer')->get();
+        return view('admin.users.trainers', compact('trainers'));
+    }
+
+    // Students List
+    public function students()
+    {
+        $students = User::where('role', 'student')->get();
+        return view('admin.users.students', compact('students'));
     }
 }
