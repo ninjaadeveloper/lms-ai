@@ -11,10 +11,13 @@ class Course extends Model
 
     // Mass assignable fields
     protected $fillable = [
-        'title',
-        'description',
-        'ai_description',
-        'duration_hours',
-        'status'
+        'title','description','duration_hours','status',
+  'trainer_id','video_url','pdf_file'
     ];
+
+    public function trainer()
+    {
+        return $this->belongsTo(User::class, 'trainer_id');
+    }
+
 }

@@ -8,7 +8,7 @@
             <div class="row">
                 <div class="col-12 col-md-12 col-lg-12">
                     <div class="card">
-                        <form method="POST" action="{{ route('users.update', $user->id) }}">
+                        <form method="POST" action="{{ route('admin.users.update', $user->id) }}">
                             @csrf
                             @method('PUT') <!-- PUT required for update -->
 

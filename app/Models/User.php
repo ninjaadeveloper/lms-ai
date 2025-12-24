@@ -19,4 +19,9 @@ class User extends Authenticatable
         'phone',
         'status'
     ];
+
+    public function courses()
+{
+    return $this->belongsToMany(\App\Models\Course::class)->withTimestamps();
+}
 }

@@ -1,28 +1,6 @@
 @extends('../admin.layout')
 
 @section('content')
-@php
-    // ✅ YouTube ID helper (works for youtu.be + youtube.com/watch?v=)
-    $youtubeId = null;
-    if (!empty($course->video_url)) {
-        $url = $course->video_url;
-
-        // youtu.be/XXXX
-        if (str_contains($url, 'youtu.be/')) {
-            $path = trim(parse_url($url, PHP_URL_PATH) ?? '', '/');
-            $youtubeId = $path ?: null;
-        }
-
-        // youtube.com/watch?v=XXXX
-        if (!$youtubeId && str_contains($url, 'youtube.com')) {
-            parse_str(parse_url($url, PHP_URL_QUERY) ?? '', $q);
-            $youtubeId = $q['v'] ?? null;
-        }
-    }
-
-    $trainer = $course->trainer; // ✅ relation (may be null)
-@endphp
-
 <div class="main-content">
     <section class="section">
         <div class="section-body">
@@ -64,22 +42,12 @@
                             </div>
 
                             <div class="mt-3 mt-md-0 d-flex flex-wrap">
-                                {{-- ✅ admin back --}}
-                                <a href="{{ route('admin.courses.index') }}" class="btn btn-light mr-2 mb-2">
+                                <a href="{{ route('trainer.courses.index') }}" class="btn btn-light mr-2 mb-2">
                                     <i class="fas fa-arrow-left mr-1"></i> Back
                                 </a>
-
-                                <a href="{{ route('admin.courses.edit', $course->id) }}" class="btn btn-primary mr-2 mb-2">
+                                <a href="{{ route('trainer.courses.edit', $course->id) }}" class="btn btn-primary mr-2 mb-2">
                                     <i class="fas fa-edit mr-1"></i> Edit
                                 </a>
-
-                                <form action="{{ route('admin.courses.destroy', $course->id) }}" method="POST" class="mb-2">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-danger" onclick="return confirm('Are you sure?')">
-                                        <i class="fas fa-trash-alt mr-1"></i> Delete
-                                    </button>
-                                </form>
                             </div>
                         </div>
                     </div>
@@ -93,7 +61,6 @@
                                     <h5 class="mb-0"><i class="fas fa-info-circle mr-1"></i> Overview</h5>
                                 </div>
                                 <div class="card-body">
-
                                     <div class="mb-3">
                                         <h6 class="text-muted mb-1">Description</h6>
                                         <p class="mb-0" style="line-height: 1.8;">
@@ -130,7 +97,6 @@
                                             @endif
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
@@ -138,32 +104,38 @@
                         {{-- Right: Trainer + Content --}}
                         <div class="col-12 col-lg-5">
 
-                            {{-- ✅ Trainer --}}
+                            {{-- Trainer --}}
                             <div class="card shadow-sm mb-4">
                                 <div class="card-header">
                                     <h5 class="mb-0"><i class="fas fa-chalkboard-teacher mr-1"></i> Trainer</h5>
                                 </div>
-
                                 <div class="card-body">
-                                    @if($trainer)
+                                    @php
+                                        $trainerName = null;
+                                        if (isset($trainerNameFromController)) {
+                                            $trainerName = $trainerNameFromController;
+                                        } elseif (isset($trainersMap) && $course->trainer_id) {
+                                            $trainerName = $trainersMap[$course->trainer_id] ?? null;
+                                        }
+                                    @endphp
+
+                                    @if($course->trainer_id && $trainerName)
                                         <div class="d-flex align-items-center">
-                                            <div class="mr-3">
+                                            <div class="avatar mr-3">
                                                 <div class="avatar-initial rounded-circle bg-primary text-white"
                                                      style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;">
-                                                    {{ strtoupper(substr($trainer->name ?? 'T', 0, 1)) }}
+                                                    {{ strtoupper(substr($trainerName, 0, 1)) }}
                                                 </div>
                                             </div>
-
                                             <div>
-                                                <div class="font-weight-bold">{{ $trainer->name }}</div>
-                                                <small class="text-muted">{{ $trainer->email }}</small>
-                                                <div class="mt-1">
-                                                    <span class="badge badge-light">Assigned Trainer</span>
-                                                </div>
+                                                <div class="font-weight-bold">{{ $trainerName }}</div>
+                                                <small class="text-muted">Assigned Trainer</small>
                                             </div>
                                         </div>
                                     @else
-                                        <div class="text-muted">No trainer assigned yet.</div>
+                                        <div class="text-muted">
+                                            No trainer assigned yet.
+                                        </div>
                                     @endif
                                 </div>
                             </div>
@@ -196,18 +168,19 @@
                                                 </button>
                                             </div>
 
-                                            @if($youtubeId)
-                                                <div class="mt-3">
-                                                    <div class="embed-responsive embed-responsive-16by9">
-                                                        <iframe class="embed-responsive-item"
-                                                                src="https://www.youtube.com/embed/{{ $youtubeId }}"
-                                                                allowfullscreen></iframe>
-                                                    </div>
-                                                    <small class="text-muted d-block mt-1">
-                                                        If preview doesn’t load, just use “Open Video”.
-                                                    </small>
+                                            {{-- Optional simple preview (works for many youtube links, not all) --}}
+                                            <div class="mt-3">
+                                                <div class="embed-responsive embed-responsive-16by9">
+                                                    <iframe class="embed-responsive-item"
+                                                            src="{{ str_contains($course->video_url, 'youtube.com') || str_contains($course->video_url, 'youtu.be')
+                                                                    ? 'https://www.youtube.com/embed/' . (str_contains($course->video_url, 'youtu.be') ? trim(parse_url($course->video_url, PHP_URL_PATH), '/') : (request()->fullUrl() && parse_str(parse_url($course->video_url, PHP_URL_QUERY) ?? '', $q) ? ($q['v'] ?? '') : ''))
+                                                                    : $course->video_url }}"
+                                                            allowfullscreen></iframe>
                                                 </div>
-                                            @endif
+                                                <small class="text-muted d-block mt-1">
+                                                    If preview doesn’t load, just use “Open Video”.
+                                                </small>
+                                            </div>
                                         @else
                                             <div class="text-muted">No video link added.</div>
                                         @endif
@@ -236,6 +209,7 @@
                                                 </a>
                                             </div>
 
+                                            {{-- Optional inline viewer --}}
                                             <div class="mt-3">
                                                 <div class="embed-responsive" style="height: 420px;">
                                                     <iframe class="embed-responsive-item"

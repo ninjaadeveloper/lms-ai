@@ -3,6 +3,7 @@
 
 
 <!-- blank.html  21 Nov 2019 03:54:41 GMT -->
+
 <head>
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
@@ -30,7 +31,7 @@
             <li><a href="#" class="nav-link nav-link-lg fullscreen-btn">
                 <i data-feather="maximize"></i>
               </a></li>
-              {{-- Search bar --}}
+            {{-- Search bar --}}
             {{-- <li>
               <form class="form-inline mr-auto">
                 <div class="search-element">
@@ -44,125 +45,165 @@
           </ul>
         </div>
         <ul class="navbar-nav navbar-right">
-          <li class="dropdown"><a href="#" data-toggle="dropdown"
-              class="nav-link dropdown-toggle nav-link-lg nav-link-user"> <img alt="image" src="{{ asset('assets//img/user.png') }}"
-                class="user-img-radious-style"> <span class="d-sm-none d-lg-inline-block"></span></a>
+          <li class="dropdown">
+            <a href="#" data-toggle="dropdown"
+              class="nav-link dropdown-toggle nav-link-lg nav-link-user d-flex align-items-center">
+
+              {{-- Letter Avatar --}}
+              <div class="user-avatar mr-2">
+                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+              </div>
+            </a>
+
             <div class="dropdown-menu dropdown-menu-right pullDown">
-              <div class="dropdown-title">Hello Sarah Smith</div>
-              <a href="profile.html" class="dropdown-item has-icon"> <i class="far
-										fa-user"></i> Profile
-              </a> 
-              <a href="#" class="dropdown-item has-icon"> <i class="fas fa-cog"></i>
-                Settings
+
+              <div class="dropdown-title">
+                Hello {{ auth()->user()->name }}
+              </div>
+
+              {{-- Profile --}}
+              <a href="{{ route('profile.edit') }}" class="dropdown-item has-icon">
+                <i class="far fa-user"></i> Profile
               </a>
+
               <div class="dropdown-divider"></div>
-              <a href="auth-login.html" class="dropdown-item has-icon text-danger"> <i class="fas fa-sign-out-alt"></i>
-                Logout
-              </a>
+
+              {{-- Logout --}}
+              <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="dropdown-item has-icon text-danger"
+                  style="background:none;border:none;width:100%;text-align:left;">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+              </form>
+
             </div>
           </li>
         </ul>
       </nav>
+
+
       <div class="main-sidebar sidebar-style-2">
         <aside id="sidebar-wrapper">
           <div class="sidebar-brand">
-            <a href="#"> <img alt="image" src="{{ asset('assets//img/logo.png') }}" class="header-logo" /> <span
-                class="logo-name">LMS - AI</span>
+            <a href="#">
+              <img alt="image" src="{{ asset('assets/img/logo.png') }}" class="header-logo" />
+              <span class="logo-name">LMS - AI</span>
             </a>
           </div>
-        <ul class="sidebar-menu">
 
-  <!-- Dashboard -->
-  <li class="menu-header">Dashboard</li>
-  <li class="dropdown">
-    <a href="{{ route('admin.dashboard') }}" class="nav-link">
-      <i data-feather="monitor"></i><span>Dashboard</span>
-    </a>
-  </li>
+          @php $role = auth()->user()->role ?? 'student'; @endphp
 
-  <!-- Users -->
-  <li class="dropdown">
-    <a href="#" class="menu-toggle nav-link has-dropdown">
-      <i data-feather="users"></i><span>Users</span>
-    </a>
-    <ul class="dropdown-menu">
-      <li><a class="nav-link" href="{{ route('users.index') }}">All Users</a></li>
-      <li><a class="nav-link" href="{{ route('users.create') }}">Add User</a></li>
-      <li><a class="nav-link" href="{{ route('users.trainers') }}">Trainers</a></li>
-      <li><a class="nav-link" href="{{ route('users.students') }}">Students</a></li>
-    </ul>
-  </li>
+          <ul class="sidebar-menu">
+            <li class="menu-header">Dashboard</li>
 
-  <!-- Courses -->
-  <li class="dropdown">
-    <a href="#" class="menu-toggle nav-link has-dropdown">
-      <i data-feather="book"></i><span>Courses</span>
-    </a>
-    <ul class="dropdown-menu">
-      <li><a class="nav-link" href="{{ route('courses.index') }}">Course List</a></li>
-      <li><a class="nav-link" href="{{ route('courses.create') }}">Add Course</a></li>
-    </ul>
-  </li>
+            {{-- Dashboard --}}
+            <li
+              class="{{ request()->routeIs('dashboard', 'admin.*', 'trainer.dashboard', 'student.dashboard') ? 'active' : '' }}">
+              <a class="nav-link" href="{{ route('dashboard') }}">
+                <i data-feather="monitor"></i><span>Dashboard</span>
+              </a>
+            </li>
 
-  <!-- Quizzes -->
-  <li class="dropdown">
-    <a href="#" class="menu-toggle nav-link has-dropdown">
-      <i data-feather="book-open"></i><span>Quizzes</span>
-    </a>
-    <ul class="dropdown-menu">
-      <li><a class="nav-link" href="{{ route('quizzes.index') }}">Quiz List</a></li>
-      <li><a class="nav-link" href="{{ route('quizzes.create') }}">Add Quiz</a></li>
-      <li><a class="nav-link" href="{{ route('quizzes.index') }}">Quiz Results</a></li>
-    </ul>
-  </li>
+            {{-- ADMIN ONLY: Users dropdown --}}
+            @if($role === 'admin')
+              <li class="dropdown {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                <a href="#" class="menu-toggle nav-link has-dropdown">
+                  <i data-feather="users"></i><span>Users</span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a class="nav-link" href="{{ route('admin.users.index') }}">All Users</a></li>
+                  <li><a class="nav-link" href="{{ route('admin.users.create') }}">Add User</a></li>
+                  <li><a class="nav-link" href="{{ route('admin.users.trainers') }}">Trainers</a></li>
+                  <li><a class="nav-link" href="{{ route('admin.users.students') }}">Students</a></li>
+                </ul>
+              </li>
+            @endif
 
-  <!-- AI Assistant -->
-  <li class="dropdown">
-    <a href="{{ route('ai.studentPerformance') }}" class="nav-link">
-      <i data-feather="cpu"></i><span>AI Assistant</span>
-    </a>
-  </li>
+            {{-- Courses --}}
+            @if($role === 'admin')
+              {{-- ✅ ADMIN dropdown (as you asked) --}}
+              <li class="dropdown {{ request()->routeIs('admin.courses.*') ? 'active' : '' }}">
+                <a href="#" class="menu-toggle nav-link has-dropdown">
+                  <i data-feather="book-open"></i><span>Courses</span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a class="nav-link" href="{{ route('admin.courses.index') }}">Course List</a></li>
+                  <li><a class="nav-link" href="{{ route('admin.courses.create') }}">Add Course</a></li>
+                </ul>
+              </li>
+            @elseif($role === 'trainer')
+              {{-- ✅ Trainer simple (no dropdown) --}}
+              <li class="{{ request()->routeIs('trainer.courses.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('trainer.courses.index') }}">
+                  <i data-feather="book-open"></i><span>Courses</span>
+                </a>
+              </li>
+            @else
+              {{-- ✅ Student simple (no dropdown) --}}
+              <li class="{{ request()->routeIs('student.courses.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('student.courses.index') }}">
+                  <i data-feather="book-open"></i><span>Courses</span>
+                </a>
+              </li>
+            @endif
 
-  <!-- Feedback -->
-  <li class="dropdown">
-    <a href="{{ route('feedback.index') }}" class="nav-link">
-      <i data-feather="message-square"></i><span>Feedback</span>
-    </a>
-  </li>
+            {{-- AI Assistant (ALL) --}}
+            <li class="{{ request()->routeIs('admin.ai.*', 'trainer.ai.*', 'student.ai.*') ? 'active' : '' }}">
+              <a class="nav-link"
+                href="{{ $role === 'admin' ? route('admin.ai.index') : ($role === 'trainer' ? route('trainer.ai.index') : route('student.ai.index')) }}">
+                <i data-feather="cpu"></i><span>AI Assistant</span>
+              </a>
+            </li>
 
-  <!-- Settings -->
-  <li class="dropdown">
-    <a href="#" class="menu-toggle nav-link has-dropdown">
-      <i data-feather="settings"></i><span>Settings</span>
-    </a>
-    <ul class="dropdown-menu">
-      <li><a class="nav-link" href="#">Profile</a></li>
-      <li><a class="nav-link" href="#">Change Password</a></li>
-    </ul>
-  </li>
+            {{-- Feedback (ALL) --}}
+            <li
+              class="{{ request()->routeIs('admin.feedback.*', 'trainer.feedback.*', 'student.feedback.*') ? 'active' : '' }}">
+              <a class="nav-link"
+                href="{{ $role === 'admin' ? route('admin.feedback.admin') : ($role === 'trainer' ? route('trainer.feedback.index') : route('student.feedback.index')) }}">
+                <i data-feather="message-square"></i><span>Feedback</span>
+              </a>
+            </li>
 
-  <!-- Logout -->
-  <li class="dropdown">
-    <a href="#" class="nav-link">
-      <i data-feather="log-out"></i><span>Logout</span>
-    </a>
-  </li>
+            {{-- Settings dropdown (ALL) --}}
+            <li class="dropdown {{ request()->routeIs('profile.*', 'password.*') ? 'active' : '' }}">
+              <a href="#" class="menu-toggle nav-link has-dropdown">
+                <i data-feather="settings"></i><span>Settings</span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="nav-link" href="{{ route('profile.edit') }}">Profile</a></li>
+                <li><a class="nav-link" href="{{ route('password.change') }}">Change Password</a></li>
+              </ul>
+            </li>
 
-         </ul>
+            {{-- Logout --}}
+            <li>
+              <a href="#" class="nav-link"
+                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                <i data-feather="log-out"></i><span>Logout</span>
+              </a>
+              <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+                @csrf
+              </form>
+            </li>
+          </ul>
         </aside>
       </div>
 
-    @yield('content')
+
+
+      @yield('content')
 
       <footer class="main-footer">
         <div class="footer-left">
-          <a href="Lms-AI.net">Lms-AI</a></a>
+          <a href="#">Lms-AI</a></a>
         </div>
         <div class="footer-right">
         </div>
       </footer>
     </div>
   </div>
+  @stack('scripts')
   <!-- General JS Scripts -->
   <script src="{{ asset('assets/js/app.min.js') }}"></script>
   <!-- JS Libraies -->
@@ -177,4 +218,5 @@
 
 
 <!-- blank.html  21 Nov 2019 03:54:41 GMT -->
+
 </html>
