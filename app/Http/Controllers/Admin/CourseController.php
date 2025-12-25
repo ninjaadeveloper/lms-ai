@@ -15,7 +15,7 @@ class CourseController extends Controller
     {
         $user = auth()->user();
 
-        // trainer map for displaying trainer names in tables/cards
+        // trainer map (id => name)
         $trainersMap = [];
         if (Schema::hasColumn('courses', 'trainer_id')) {
             $trainersMap = User::where('role', 'trainer')->pluck('name', 'id')->toArray();
@@ -33,10 +33,19 @@ class CourseController extends Controller
             return view('trainer.courses.index', compact('courses', 'trainersMap'));
         }
 
-        // STUDENT: browse list (or your logic)
+        // STUDENT: all courses + enrolled badge
         if ($user->role === 'student') {
             $courses = Course::latest()->paginate(12);
-            return view('student.courses.index', compact('courses', 'trainersMap'));
+
+            $enrolledCourseIds = [];
+            if (Schema::hasTable('course_students')) {
+                $enrolledCourseIds = DB::table('course_students')
+                    ->where('user_id', $user->id)
+                    ->pluck('course_id')
+                    ->toArray();
+            }
+
+            return view('student.courses.index', compact('courses', 'trainersMap', 'enrolledCourseIds'));
         }
 
         // ADMIN
@@ -46,7 +55,6 @@ class CourseController extends Controller
 
     public function create()
     {
-        // admin only view
         $trainers = User::where('role', 'trainer')->orderBy('name')->get();
         return view('admin.courses.create', compact('trainers'));
     }
@@ -54,13 +62,13 @@ class CourseController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title'          => 'required|string|max:255',
-            'description'    => 'nullable|string',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'duration_hours' => 'nullable|integer|min:1',
-            'status'         => 'nullable|boolean',
-            'trainer_id'     => 'nullable|exists:users,id',
-            'video_url'      => 'nullable|url',
-            'pdf_file'       => 'nullable|file|mimes:pdf|max:20480',
+            'status' => 'nullable|boolean',
+            'trainer_id' => 'nullable|exists:users,id',
+            'video_url' => 'nullable|url',
+            'pdf_file' => 'nullable|file|mimes:pdf|max:20480',
         ]);
 
         $pdfPath = null;
@@ -69,13 +77,13 @@ class CourseController extends Controller
         }
 
         Course::create([
-            'title'          => $validated['title'],
-            'description'    => $validated['description'] ?? null,
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
             'duration_hours' => $validated['duration_hours'] ?? null,
-            'status'         => $request->has('status') ? 1 : 0,
-            'trainer_id'     => $validated['trainer_id'] ?? null,
-            'video_url'      => $validated['video_url'] ?? null,
-            'pdf_file'       => $pdfPath,
+            'status' => $request->has('status') ? 1 : 0,
+            'trainer_id' => $validated['trainer_id'] ?? null,
+            'video_url' => $validated['video_url'] ?? null,
+            'pdf_file' => $pdfPath,
         ]);
 
         return redirect()->route('admin.courses.index')->with('success', 'Course created successfully!');
@@ -84,54 +92,94 @@ class CourseController extends Controller
     public function show(Course $course)
     {
         $user = auth()->user();
-    
-        // ✅ security: trainer sirf apna course dekh sakay
+
+        // ✅ security: trainer only own course
         if ($user->role === 'trainer') {
-            if (Schema::hasColumn('courses', 'trainer_id') && (int)$course->trainer_id !== (int)$user->id) {
+            if (Schema::hasColumn('courses', 'trainer_id') && (int) $course->trainer_id !== (int) $user->id) {
                 abort(403);
             }
         }
-    
-        // ✅ trainer name for show page
-        $trainerNameFromController = null;
-    
-        if (Schema::hasColumn('courses', 'trainer_id') && $course->trainer_id) {
-            $trainerNameFromController = User::where('id', $course->trainer_id)->value('name');
-        }
-    
-        // (optional) map bhi bhej do taake aapka blade dono support kare
+
+        // ✅ trainers map (id => name)
         $trainersMap = [];
         if (Schema::hasColumn('courses', 'trainer_id')) {
             $trainersMap = User::where('role', 'trainer')->pluck('name', 'id')->toArray();
         }
-    
+
+        // ✅ trainer name for show page (works even without relation)
+        $trainerNameFromController = null;
+        if (Schema::hasColumn('courses', 'trainer_id') && !empty($course->trainer_id)) {
+            $trainerNameFromController = User::where('id', $course->trainer_id)->value('name');
+        }
+
+        // ✅ STUDENT enrolled check (course_students)
+        $enrolled = false;
+        if ($user->role === 'student' && Schema::hasTable('course_students')) {
+            $enrolled = DB::table('course_students')
+                ->where('user_id', $user->id)
+                ->where('course_id', $course->id)
+                ->exists();
+        }
+
+        // ✅ TRAINER: show page + enrolled students (pagination)
         if ($user->role === 'trainer') {
-            return view('trainer.courses.show', compact('course', 'trainerNameFromController', 'trainersMap'));
+
+            $enrollments = collect(); // safe default
+
+            if (Schema::hasTable('course_students')) {
+                $enrollments = DB::table('course_students')
+                    ->join('users', 'users.id', '=', 'course_students.user_id')
+                    ->where('course_students.course_id', $course->id)
+                    ->select(
+                        'users.id as student_id',
+                        'users.name as student_name',
+                        'users.email as student_email',
+                        'course_students.created_at as enrolled_at'
+                    )
+                    ->orderByDesc('course_students.created_at')
+                    ->paginate(20);
+            }
+
+            return view('trainer.courses.show', compact(
+                'course',
+                'trainerNameFromController',
+                'trainersMap',
+                'enrollments'
+            ));
         }
-    
+
+        // ✅ STUDENT show
         if ($user->role === 'student') {
-            return view('student.courses.show', compact('course', 'trainerNameFromController', 'trainersMap'));
+            return view('student.courses.show', compact(
+                'course',
+                'trainerNameFromController',
+                'trainersMap',
+                'enrolled'
+            ));
         }
-    
-        return view('admin.courses.show', compact('course', 'trainerNameFromController', 'trainersMap'));
+
+        // ✅ ADMIN show
+        return view('admin.courses.show', compact(
+            'course',
+            'trainerNameFromController',
+            'trainersMap'
+        ));
     }
-    
+
 
     public function edit(Course $course)
     {
         $user = auth()->user();
 
         if ($user->role === 'trainer') {
-            if (Schema::hasColumn('courses', 'trainer_id') && (int)$course->trainer_id !== (int)$user->id) {
+            if (Schema::hasColumn('courses', 'trainer_id') && (int) $course->trainer_id !== (int) $user->id) {
                 abort(403);
             }
 
-            // ✅ pass empty trainers to avoid "Undefined variable $trainers"
-            $trainers = collect(); 
+            $trainers = collect(); // to avoid undefined variable
             return view('trainer.courses.edit', compact('course', 'trainers'));
         }
 
-        // admin
         $trainers = User::where('role', 'trainer')->orderBy('name')->get();
         return view('admin.courses.edit', compact('course', 'trainers'));
     }
@@ -141,37 +189,34 @@ class CourseController extends Controller
         $user = auth()->user();
 
         if ($user->role === 'trainer') {
-            if (Schema::hasColumn('courses', 'trainer_id') && (int)$course->trainer_id !== (int)$user->id) {
+            if (Schema::hasColumn('courses', 'trainer_id') && (int) $course->trainer_id !== (int) $user->id) {
                 abort(403);
             }
 
             $data = $request->validate([
-                'title'          => 'required|string|max:255',
-                'description'    => 'nullable|string',
-                'video_url'      => 'nullable|url',
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'video_url' => 'nullable|url',
                 'duration_hours' => 'nullable|integer|min:0',
-                'status'         => 'nullable|boolean',
+                'status' => 'nullable|boolean',
             ]);
 
             $data['status'] = $request->has('status') ? 1 : 0;
-
             $course->update($data);
 
             return redirect()->route('trainer.courses.show', $course->id)->with('success', 'Course updated');
         }
 
-        // admin update
         $data = $request->validate([
-            'title'          => 'required|string|max:255',
-            'description'    => 'nullable|string',
-            'video_url'      => 'nullable|url',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'video_url' => 'nullable|url',
             'duration_hours' => 'nullable|integer|min:0',
-            'status'         => 'nullable|boolean',
-            'trainer_id'     => 'nullable|exists:users,id',
+            'status' => 'nullable|boolean',
+            'trainer_id' => 'nullable|exists:users,id',
         ]);
 
         $data['status'] = $request->has('status') ? 1 : 0;
-
         $course->update($data);
 
         return redirect()->route('admin.courses.show', $course->id)->with('success', 'Course updated');
@@ -179,25 +224,191 @@ class CourseController extends Controller
 
     public function destroy(Course $course)
     {
-        // keep destroy admin only via middleware/route group
         $course->delete();
         return redirect()->route('admin.courses.index')->with('success', 'Course deleted successfully!');
     }
 
-    // student enroll
+    // ✅ Student enroll (BLOCK if inactive)
     public function studentEnroll(Course $course)
     {
         $user = auth()->user();
 
-        if (!Schema::hasTable('course_user')) {
-            abort(500, 'course_user table missing');
+        if (!Schema::hasTable('course_students')) {
+            abort(500, 'course_students table missing');
         }
 
-        DB::table('course_user')->updateOrInsert(
+        // ✅ Don't allow enroll if course inactive
+        if (!($course->status ?? 0)) {
+            return redirect()
+                ->route('student.courses.show', $course->id)
+                ->with('error', 'This course is currently inactive. Enrollment is not available.');
+        }
+
+        DB::table('course_students')->updateOrInsert(
             ['user_id' => $user->id, 'course_id' => $course->id],
             ['created_at' => now(), 'updated_at' => now()]
         );
 
-        return redirect()->route('student.courses.show', $course->id)->with('success', 'Enrolled successfully');
+        return redirect()->route('student.courses.show', $course->id)
+            ->with('success', 'You have been enrolled successfully.');
     }
+
+    // ✅ ADMIN: Enrolled students (per course)
+// ✅ ADMIN: per-course enrolled students
+    public function enrollments(Course $course)
+    {
+        if (!Schema::hasTable('course_students')) {
+            abort(500, 'course_students table missing');
+        }
+
+        $enrollments = DB::table('course_students')
+            ->join('users', 'users.id', '=', 'course_students.user_id')
+            ->where('course_students.course_id', $course->id)
+            ->select(
+                'users.id as student_id',
+                'users.name as student_name',
+                'users.email as student_email',
+                'course_students.created_at as enrolled_at'
+            )
+            ->orderByDesc('course_students.created_at')
+            ->paginate(20);
+
+        // ✅ yahan course bhi pass kar do (header waghera me kaam ayega)
+        return view('admin.courses.enrollments', compact('course', 'enrollments'));
+    }
+
+    // ✅ OPTIONAL (Sidebar page): ADMIN all enrollments (course + student)
+    public function allEnrollments()
+    {
+        $user = auth()->user();
+
+        // ✅ only admin
+        if ($user->role !== 'admin') {
+            abort(403);
+        }
+
+        if (!Schema::hasTable('course_students')) {
+            return redirect()->route('admin.courses.index')->with('error', 'course_students table missing');
+        }
+
+        $enrollments = DB::table('course_students')
+            ->join('courses', 'courses.id', '=', 'course_students.course_id')
+            ->join('users', 'users.id', '=', 'course_students.user_id')
+            ->select(
+                'course_students.id',
+                'course_students.created_at as enrolled_at',
+                'courses.id as course_id',
+                'courses.title as course_title',
+                'users.id as student_id',
+                'users.name as student_name',
+                'users.email as student_email'
+            )
+            ->orderByDesc('course_students.created_at')
+            ->paginate(20);
+
+        return view('admin.enrollments.index', compact('enrollments'));
+    }
+
+
+    // ✅ OPTIONAL (Sidebar page): TRAINER all enrollments for own courses
+    public function trainerAllEnrollments()
+    {
+        $user = auth()->user();
+
+        $rows = DB::table('course_students')
+            ->join('users', 'users.id', '=', 'course_students.user_id')
+            ->join('courses', 'courses.id', '=', 'course_students.course_id')
+            ->select(
+                'course_students.created_at as enrolled_at',
+                'users.id as student_id',
+                'users.name as student_name',
+                'users.email',
+                'courses.id as course_id',
+                'courses.title as course_title'
+            )
+            ->where('courses.trainer_id', $user->id)
+            ->orderByDesc('course_students.created_at')
+            ->paginate(20);
+
+        return view('trainer.enrollments.index', compact('rows'));
+    }
+
+    // ✅ TRAINER: sidebar page (all enrollments for trainer's OWN courses)
+    public function trainerEnrollmentsIndex()
+    {
+        $user = auth()->user();
+
+        if (!Schema::hasTable('course_students')) {
+            abort(500, 'course_students table missing');
+        }
+
+        $enrollments = DB::table('course_students')
+            ->join('courses', 'courses.id', '=', 'course_students.course_id')
+            ->join('users', 'users.id', '=', 'course_students.user_id')
+            ->where('courses.trainer_id', $user->id)
+            ->select(
+                'course_students.id',
+                'course_students.created_at as enrolled_at',
+                'courses.id as course_id',
+                'courses.title as course_title',
+                'users.id as student_id',
+                'users.name as student_name',
+                'users.email as student_email'
+            )
+            ->orderByDesc('course_students.created_at')
+            ->paginate(20);
+
+        return view('trainer.enrollments.index', compact('enrollments'));
+    }
+
+    // ✅ TRAINER: per-course enrollments (ONLY own course)
+// TRAINER: per-course enrollments
+    public function trainerEnrollments(Course $course)
+    {
+        $user = auth()->user();
+
+        // security: trainer sirf apna course
+        if (Schema::hasColumn('courses', 'trainer_id') && (int) $course->trainer_id !== (int) $user->id) {
+            abort(403);
+        }
+
+        if (!Schema::hasTable('course_students')) {
+            abort(500, 'course_students table missing');
+        }
+
+        $enrollments = DB::table('course_students')
+            ->join('users', 'users.id', '=', 'course_students.user_id')
+            ->where('course_students.course_id', $course->id)
+            ->select(
+                'users.id as student_id',
+                'users.name as student_name',
+                'users.email as student_email',
+                'course_students.created_at as enrolled_at'
+            )
+            ->orderByDesc('course_students.created_at')
+            ->paginate(20);
+
+        return view('trainer.enrollments.course', compact('course', 'enrollments'));
+    }
+
+    public function removeStudent($course, $student)
+    {
+        // safety: course_students table required
+        if (!\Illuminate\Support\Facades\Schema::hasTable('course_students')) {
+            return back()->with('error', 'Enrollments table not found.');
+        }
+
+        // delete enrollment row
+        $deleted = DB::table('course_students')
+            ->where('course_id', $course)
+            ->where('user_id', $student)
+            ->delete();
+
+        if ($deleted) {
+            return back()->with('success', 'Student unenrolled successfully.');
+        }
+
+        return back()->with('error', 'Enrollment not found (already removed).');
+    }
+
 }

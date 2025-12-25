@@ -2,25 +2,45 @@
 
 @section('content')
 @php
-    // ✅ YouTube ID helper (works for youtu.be + youtube.com/watch?v=)
+    use Illuminate\Support\Facades\DB;
+
+    // ✅ Enrollments (course_students)
+    $enrollmentsCount = 0;
+    $recentEnrolled = collect();
+
+    if (\Illuminate\Support\Facades\Schema::hasTable('course_students')) {
+        $enrollmentsCount = DB::table('course_students')
+            ->where('course_id', $course->id)
+            ->count();
+
+        // recent 10 students
+        $recentEnrolled = DB::table('course_students')
+            ->join('users', 'users.id', '=', 'course_students.user_id')
+            ->where('course_students.course_id', $course->id)
+            ->orderByDesc('course_students.created_at')
+            ->select('users.id','users.name','users.email','course_students.created_at')
+            ->limit(10)
+            ->get();
+    }
+
+    // ✅ YouTube ID helper
     $youtubeId = null;
     if (!empty($course->video_url)) {
         $url = $course->video_url;
 
-        // youtu.be/XXXX
         if (str_contains($url, 'youtu.be/')) {
             $path = trim(parse_url($url, PHP_URL_PATH) ?? '', '/');
             $youtubeId = $path ?: null;
         }
 
-        // youtube.com/watch?v=XXXX
         if (!$youtubeId && str_contains($url, 'youtube.com')) {
             parse_str(parse_url($url, PHP_URL_QUERY) ?? '', $q);
             $youtubeId = $q['v'] ?? null;
         }
     }
 
-    $trainer = $course->trainer; // ✅ relation (may be null)
+    // ✅ trainer relation (may be null)
+    $trainer = $course->trainer ?? null;
 @endphp
 
 <div class="main-content">
@@ -59,14 +79,20 @@
                                         Created: {{ optional($course->created_at)->format('d M Y') ?? '-' }}
                                         <span class="mx-2">•</span>
                                         Updated: {{ optional($course->updated_at)->format('d M Y') ?? '-' }}
+                                        <span class="mx-2">•</span>
+                                        <span class="badge badge-light">Enrollments: {{ $enrollmentsCount }}</span>
                                     </small>
                                 </div>
                             </div>
 
                             <div class="mt-3 mt-md-0 d-flex flex-wrap">
-                                {{-- ✅ admin back --}}
                                 <a href="{{ route('admin.courses.index') }}" class="btn btn-light mr-2 mb-2">
                                     <i class="fas fa-arrow-left mr-1"></i> Back
+                                </a>
+
+                                {{-- ✅ Full list page --}}
+                                <a href="{{ route('admin.courses.enrollments', $course->id) }}" class="btn btn-secondary mr-2 mb-2">
+                                    <i class="fas fa-users mr-1"></i> Enrollments
                                 </a>
 
                                 <a href="{{ route('admin.courses.edit', $course->id) }}" class="btn btn-primary mr-2 mb-2">
@@ -86,14 +112,15 @@
 
                     <div class="row">
 
-                        {{-- Left: Overview --}}
+                        {{-- Left: Overview + Enrolled Students --}}
                         <div class="col-12 col-lg-7">
+
+                            {{-- Overview --}}
                             <div class="card shadow-sm mb-4">
                                 <div class="card-header">
                                     <h5 class="mb-0"><i class="fas fa-info-circle mr-1"></i> Overview</h5>
                                 </div>
                                 <div class="card-body">
-
                                     <div class="mb-3">
                                         <h6 class="text-muted mb-1">Description</h6>
                                         <p class="mb-0" style="line-height: 1.8;">
@@ -106,15 +133,10 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3 mb-md-0">
                                             <h6 class="text-muted mb-1">Duration (hours)</h6>
-                                            <div class="d-flex align-items-center">
-                                                <div class="mr-2">
-                                                    <span class="badge badge-light p-2">
-                                                        <i class="far fa-clock mr-1"></i>
-                                                        {{ $course->duration_hours ?? '-' }}
-                                                    </span>
-                                                </div>
-                                                <small class="text-muted">Estimated learning time</small>
-                                            </div>
+                                            <span class="badge badge-light p-2">
+                                                <i class="far fa-clock mr-1"></i>
+                                                {{ $course->duration_hours ?? '-' }}
+                                            </span>
                                         </div>
 
                                         <div class="col-md-6">
@@ -130,15 +152,52 @@
                                             @endif
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
+
+                            {{-- Enrolled Students (Quick View) --}}
+                            <div class="card shadow-sm mb-4">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0"><i class="fas fa-user-graduate mr-1"></i> Recently Enrolled Students</h5>
+                                    <a href="{{ route('admin.courses.enrollments', $course->id) }}" class="btn btn-sm btn-outline-secondary">
+                                        View All
+                                    </a>
+                                </div>
+
+                                <div class="card-body p-0">
+                                    @if($enrollmentsCount === 0)
+                                        <div class="p-4 text-muted">No students enrolled yet.</div>
+                                    @else
+                                        <div class="table-responsive">
+                                            <table class="table table-striped mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name</th>
+                                                        <th>Email</th>
+                                                        <th class="text-right">Enrolled At</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach($recentEnrolled as $s)
+                                                        <tr>
+                                                            <td>{{ $s->name }}</td>
+                                                            <td>{{ $s->email }}</td>
+                                                            <td class="text-right">{{ \Carbon\Carbon::parse($s->created_at)->format('d M Y') }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
                         </div>
 
                         {{-- Right: Trainer + Content --}}
                         <div class="col-12 col-lg-5">
 
-                            {{-- ✅ Trainer --}}
+                            {{-- Trainer --}}
                             <div class="card shadow-sm mb-4">
                                 <div class="card-header">
                                     <h5 class="mb-0"><i class="fas fa-chalkboard-teacher mr-1"></i> Trainer</h5>
@@ -204,7 +263,7 @@
                                                                 allowfullscreen></iframe>
                                                     </div>
                                                     <small class="text-muted d-block mt-1">
-                                                        If preview doesn’t load, just use “Open Video”.
+                                                        If the preview doesn’t load, use “Open Video”.
                                                     </small>
                                                 </div>
                                             @endif

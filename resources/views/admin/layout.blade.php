@@ -98,8 +98,7 @@
             <li class="menu-header">Dashboard</li>
 
             {{-- Dashboard --}}
-            <li
-              class="{{ request()->routeIs('dashboard', 'admin.*', 'trainer.dashboard', 'student.dashboard') ? 'active' : '' }}">
+            <li class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
               <a class="nav-link" href="{{ route('dashboard') }}">
                 <i data-feather="monitor"></i><span>Dashboard</span>
               </a>
@@ -120,27 +119,59 @@
               </li>
             @endif
 
-            {{-- Courses --}}
+            {{-- COURSES --}}
             @if($role === 'admin')
-              {{-- ✅ ADMIN dropdown (as you asked) --}}
-              <li class="dropdown {{ request()->routeIs('admin.courses.*') ? 'active' : '' }}">
+              {{-- ✅ ADMIN dropdown --}}
+              <li class="dropdown {{ request()->routeIs('admin.courses.*', 'admin.enrollments.*') ? 'active' : '' }}">
                 <a href="#" class="menu-toggle nav-link has-dropdown">
                   <i data-feather="book-open"></i><span>Courses</span>
                 </a>
                 <ul class="dropdown-menu">
                   <li><a class="nav-link" href="{{ route('admin.courses.index') }}">Course List</a></li>
                   <li><a class="nav-link" href="{{ route('admin.courses.create') }}">Add Course</a></li>
+
+                  {{-- ✅ All enrollments list (no param) --}}
+                  <li><a class="nav-link" href="{{ route('admin.enrollments.index') }}">Enrollments (All)</a></li>
+
+                  {{-- Optional: only when viewing a course show page --}}
+                  @if(request()->routeIs('admin.courses.show') && isset($course))
+                    <li>
+                      <a class="nav-link" href="{{ route('admin.courses.enrollments', $course->id) }}">
+                        This Course Enrollments
+                      </a>
+                    </li>
+                  @endif
                 </ul>
               </li>
+
             @elseif($role === 'trainer')
-              {{-- ✅ Trainer simple (no dropdown) --}}
-              <li class="{{ request()->routeIs('trainer.courses.*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('trainer.courses.index') }}">
+              {{-- ✅ TRAINER dropdown --}}
+              <li class="dropdown {{ request()->routeIs('trainer.courses.*', 'trainer.enrollments.*') ? 'active' : '' }}">
+                <a href="#" class="menu-toggle nav-link has-dropdown">
                   <i data-feather="book-open"></i><span>Courses</span>
                 </a>
+
+                <ul class="dropdown-menu">
+                  <li><a class="nav-link" href="{{ route('trainer.courses.index') }}">My Courses</a></li>
+
+                  {{-- ✅ SAFE: trainer enrollments index (NO param) --}}
+                  @if(Route::has('trainer.enrollments.index'))
+                    <li><a class="nav-link" href="{{ route('trainer.enrollments.index') }}">Enrollments (All)</a></li>
+                  @endif
+
+                  {{-- ✅ Course enrollments ONLY when on course show + course exists --}}
+                  @if(request()->routeIs('trainer.courses.show') && isset($course) && Route::has('trainer.courses.enrollments'))
+                    <li>
+                      <a class="nav-link" href="{{ route('trainer.courses.enrollments', $course->id) }}">
+                        This Course Enrollments
+                      </a>
+                    </li>
+                  @endif
+                </ul>
               </li>
+
             @else
-              {{-- ✅ Student simple (no dropdown) --}}
+              {{-- ✅ STUDENT simple --}}
               <li class="{{ request()->routeIs('student.courses.*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('student.courses.index') }}">
                   <i data-feather="book-open"></i><span>Courses</span>
@@ -165,7 +196,7 @@
               </a>
             </li>
 
-            {{-- Settings dropdown (ALL) --}}
+            {{-- Settings --}}
             <li class="dropdown {{ request()->routeIs('profile.*', 'password.*') ? 'active' : '' }}">
               <a href="#" class="menu-toggle nav-link has-dropdown">
                 <i data-feather="settings"></i><span>Settings</span>
@@ -186,9 +217,14 @@
                 @csrf
               </form>
             </li>
+
           </ul>
         </aside>
+
+
       </div>
+
+
 
 
 

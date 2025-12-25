@@ -21,7 +21,7 @@
       @endif
 
       <div class="row justify-content-center">
-        <div class="col-12 col-lg-10">
+        <div class="col-12 col-lg-12">
 
           {{-- Header Card --}}
           <div class="card shadow-sm mb-4">

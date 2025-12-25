@@ -154,7 +154,7 @@ async function sendMessage(msg) {
   chatBox.scrollTop = chatBox.scrollHeight;
 
   try {
-    const res = await fetch("{{ route('admin.ai.send') }}", {
+    const res = await fetch("{{ route(auth()->user()->role . '.ai.send') }}", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

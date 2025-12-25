@@ -13,29 +13,26 @@ use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Controllers\ProfileController;
 
 // ---------------- AUTH ----------------
-Route::get('/', fn () => redirect()->route('login'));
+Route::get('/', fn() => redirect()->route('login'));
 
-Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-Route::post('/logout',[AuthController::class, 'logout'])->name('logout');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // ---------------- COMMON (ALL ROLES) ----------------
 Route::middleware(['auth'])->group(function () {
-
-    // ONE ENTRY dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Profile (ALL roles)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
-    // Change password (ALL roles)
-    Route::get('/change-password',  [AuthController::class, 'showChangePassword'])->name('password.change');
+    Route::get('/change-password', [AuthController::class, 'showChangePassword'])->name('password.change');
     Route::post('/change-password', [AuthController::class, 'updatePassword'])->name('password.update');
 });
 
 // ---------------- ADMIN ----------------
-Route::middleware(['auth','role:admin'])
+// ---------------- ADMIN ----------------
+Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -45,37 +42,65 @@ Route::middleware(['auth','role:admin'])
         Route::get('/users/students', [UserController::class, 'students'])->name('users.students');
         Route::resource('/users', UserController::class);
 
-        // Courses
+        // ✅ ADMIN ALL ENROLLMENTS (Sidebar page) - NO PARAM
+        Route::get('/enrollments', [CourseController::class, 'allEnrollments'])
+            ->name('enrollments.index');
+
+        // ✅ ADMIN PER-COURSE ENROLLMENTS - requires {course}
+        Route::get('/courses/{course}/enrollments', [CourseController::class, 'enrollments'])
+            ->name('courses.enrollments');
+
+        // Optional admin enroll/remove
+        Route::post('/courses/{course}/enroll', [CourseController::class, 'enrollStudent'])
+            ->name('courses.enroll');
+        Route::delete('/courses/{course}/remove/{student}', [CourseController::class, 'removeStudent'])
+            ->name('courses.removeStudent');
+
+        // Courses resource
         Route::resource('/courses', CourseController::class);
 
-        Route::post('/courses/{course}/enroll', [CourseController::class, 'enrollStudent'])->name('courses.enroll');
-        Route::delete('/courses/{course}/remove/{student}', [CourseController::class, 'removeStudent'])->name('courses.removeStudent');
-        Route::post('/courses/{course}/ai-description', [CourseController::class, 'generateAiDescription'])->name('courses.aiDescription');
+        // AI course description (optional)
+        Route::post('/courses/{course}/ai-description', [CourseController::class, 'generateAiDescription'])
+            ->name('courses.aiDescription');
 
         // Quizzes
         Route::resource('/quizzes', QuizController::class);
         Route::get('/quizzes/{quiz}/results', [QuizController::class, 'results'])->name('quizzes.results');
 
-        // Feedback (admin list)
-        Route::get('/feedback-list', [FeedbackController::class, 'adminIndex'])->name('feedback.admin');
-
         // AI Assistant
         Route::get('/ai-assistant', [AiAssistantController::class, 'index'])->name('ai.index');
         Route::post('/ai-assistant/send', [AiAssistantController::class, 'send'])->name('ai.send');
+
+        // ✅ Feedback (ADMIN)
+        Route::get('/feedback-list', [FeedbackController::class, 'adminIndex'])->name('feedback.admin');
+
+        Route::get('/feedback/{feedback}', [FeedbackController::class, 'adminShow'])->name('feedback.show');
+        Route::patch('/feedback/{feedback}/status', [FeedbackController::class, 'updateStatus'])->name('feedback.status');
+
+        // ✅ Extra: if blade POST bhej rahi ho to 405 na aaye
+        Route::post('/feedback/{feedback}/status', [FeedbackController::class, 'updateStatus'])->name('feedback.status.post');
     });
 
+
 // ---------------- TRAINER ----------------
-Route::middleware(['auth','role:trainer'])
+Route::middleware(['auth', 'role:trainer'])
     ->prefix('trainer')
     ->name('trainer.')
     ->group(function () {
 
-        // (optional) if you want /trainer/dashboard url too
-        Route::get('/dashboard', fn()=>redirect()->route('dashboard'))->name('dashboard');
+        Route::get('/dashboard', fn() => redirect()->route('dashboard'))->name('dashboard');
 
-        // Trainer courses (resource => calls index/show/edit/update ONLY)
+        // ✅ TRAINER ALL ENROLLMENTS (Sidebar page) - NO PARAM
+        Route::get('/enrollments', [CourseController::class, 'trainerEnrollmentsIndex'])
+            ->name('enrollments.index');
+
+        // ✅ TRAINER PER-COURSE ENROLLMENTS - requires {course}
+        Route::get('/courses/{course}/enrollments', [CourseController::class, 'trainerEnrollments'])
+            ->name('courses.enrollments');
+
+        // Courses (trainer)
         Route::resource('/courses', CourseController::class)
-            ->only(['index','show','edit','update'])
+            ->only(['index', 'show', 'edit', 'update'])
             ->names('courses');
 
         // Feedback
@@ -88,20 +113,19 @@ Route::middleware(['auth','role:trainer'])
     });
 
 // ---------------- STUDENT ----------------
-Route::middleware(['auth','role:student'])
+Route::middleware(['auth', 'role:student'])
     ->prefix('student')
     ->name('student.')
     ->group(function () {
 
-        // (optional) if you want /student/dashboard url too
-        Route::get('/dashboard', fn()=>redirect()->route('dashboard'))->name('dashboard');
+        Route::get('/dashboard', fn() => redirect()->route('dashboard'))->name('dashboard');
 
-        // Student courses
         Route::resource('/courses', CourseController::class)
-            ->only(['index','show'])
+            ->only(['index', 'show'])
             ->names('courses');
 
-        Route::post('/courses/{course}/enroll', [CourseController::class, 'studentEnroll'])->name('courses.enroll');
+        Route::post('/courses/{course}/enroll', [CourseController::class, 'studentEnroll'])
+            ->name('courses.enroll');
 
         // Feedback
         Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
@@ -112,18 +136,17 @@ Route::middleware(['auth','role:student'])
         Route::post('/ai-assistant/send', [AiAssistantController::class, 'send'])->name('ai.send');
     });
 
-
 // ---------------------------------------------------------------------
-// ✅ ROUTE ALIASES (TEMP FIX) so old blades like route('admin.users.show') work
+// ✅ ROUTE ALIASES (TEMP FIX) for old blades using route('courses.index')
 // ---------------------------------------------------------------------
-Route::middleware(['auth','role:admin'])->group(function () {
-    // Users alias
-    Route::get('/users', fn()=>redirect()->route('admin.users.index'))->name('users.index');
-    Route::get('/users/create', fn()=>redirect()->route('admin.users.create'))->name('users.create');
-    Route::get('/users/{user}', fn($user)=>redirect()->route('admin.admin.users.show',$user))->name('admin.users.show');
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/courses', fn() => redirect()->route('admin.courses.index'))->name('courses.index');
+    Route::get('/courses/create', fn() => redirect()->route('admin.courses.create'))->name('courses.create');
+    Route::get('/courses/{course}', fn($course) => redirect()->route('admin.courses.show', $course))->name('courses.show');
+    Route::get('/courses/{course}/edit', fn($course) => redirect()->route('admin.courses.edit', $course))->name('courses.edit');
 
-    // Courses alias
-    Route::get('/courses', fn()=>redirect()->route('admin.courses.index'))->name('courses.index');
-    Route::get('/courses/create', fn()=>redirect()->route('admin.courses.create'))->name('courses.create');
-    Route::get('/courses/{course}', fn($course)=>redirect()->route('admin.courses.show',$course))->name('courses.show');
+    Route::get('/users', fn() => redirect()->route('admin.users.index'))->name('users.index');
+    Route::get('/users/create', fn() => redirect()->route('admin.users.create'))->name('users.create');
+    Route::get('/users/{user}', fn($user) => redirect()->route('admin.users.show', $user))->name('users.show');
+    Route::get('/users/{user}/edit', fn($user) => redirect()->route('admin.users.edit', $user))->name('users.edit');
 });

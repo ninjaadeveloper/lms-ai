@@ -20,4 +20,11 @@ class Course extends Model
         return $this->belongsTo(User::class, 'trainer_id');
     }
 
+     // students enrolled
+     public function students()
+     {
+         return $this->belongsToMany(User::class, 'course_user')
+             ->withTimestamps();
+     }
+
 }

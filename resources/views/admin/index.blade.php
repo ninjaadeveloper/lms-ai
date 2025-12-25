@@ -2,26 +2,77 @@
 
 @section('content')
   <style>
-    .dash-title { font-size: 22px; font-weight: 700; }
-    .mini-muted { font-size: 12px; opacity: .75; }
-    .stat-card { border-radius: 14px; box-shadow: 0 10px 25px rgba(0, 0, 0, .06); }
-    .stat-card .card-body { padding: 18px 18px; }
+    .dash-title {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    .mini-muted {
+      font-size: 12px;
+      opacity: .75;
+    }
+
+    .stat-card {
+      border-radius: 14px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, .06);
+    }
+
+    .stat-card .card-body {
+      padding: 18px 18px;
+    }
+
     .stat-icon {
-      width: 42px; height: 42px; border-radius: 12px;
-      display: inline-flex; align-items: center; justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       background: rgba(103, 119, 239, .12);
     }
-    .stat-icon svg { width: 22px; height: 22px; }
-    .chart-card { border-radius: 14px; box-shadow: 0 10px 25px rgba(0, 0, 0, .06); }
-    .chart-box { min-height: 320px; }
-    .chart-sm { min-height: 240px; }
-    .table td, .table th { vertical-align: middle !important; }
-    .click-row { cursor: pointer; }
-    .click-row:hover { background: #f7f9ff; }
+
+    .stat-icon svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .chart-card {
+      border-radius: 14px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, .06);
+    }
+
+    .chart-box {
+      min-height: 320px;
+    }
+
+    .chart-sm {
+      min-height: 240px;
+    }
+
+    .table td,
+    .table th {
+      vertical-align: middle !important;
+    }
+
+    .click-row {
+      cursor: pointer;
+    }
+
+    .click-row:hover {
+      background: #f7f9ff;
+    }
+
     .avatar-circle {
-      width: 34px; height: 34px; border-radius: 50%;
-      display: inline-flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 13px; color: #fff; background: #6777ef;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      color: #fff;
+      background: #6777ef;
     }
   </style>
 
@@ -200,9 +251,8 @@
                             </td>
                             <td><span class="badge badge-light text-uppercase">{{ $u->role }}</span></td>
                             <td class="text-right">
-                              <a href="{{ route('admin.users.show', $u->id) }}"
-                                 class="btn btn-sm btn-outline-primary"
-                                 onclick="event.stopPropagation()">Details</a>
+                              <a href="{{ route('admin.users.show', $u->id) }}" class="btn btn-sm btn-outline-primary"
+                                onclick="event.stopPropagation()">Details</a>
                             </td>
                           </tr>
                         @empty
@@ -236,23 +286,22 @@
                       </thead>
                       <tbody>
                         @forelse(($recentCourses ?? []) as $c)
-                          {{-- ✅ FIXED: admin.courses.show --}}
-                          <tr class="click-row" onclick="window.location='{{ route('admin.courses.show', $c->id) }}'">
-                            <td>
-                              <div class="font-weight-bold">{{ $c->title }}</div>
-                              <div class="mini-muted">{{ \Illuminate\Support\Str::limit($c->description, 55) }}</div>
-                            </td>
-                            <td>
-                              {!! ($c->status ?? 0)
-                                  ? '<span class="badge badge-success">Active</span>'
-                                  : '<span class="badge badge-danger">Inactive</span>' !!}
-                            </td>
-                            <td class="text-right">
-                              <a href="{{ route('admin.courses.show', $c->id) }}"
-                                 class="btn btn-sm btn-outline-info"
-                                 onclick="event.stopPropagation()">Detail</a>
-                            </td>
-                          </tr>
+                                        {{-- ✅ FIXED: admin.courses.show --}}
+                                        <tr class="click-row" onclick="window.location='{{ route('admin.courses.show', $c->id) }}'">
+                                          <td>
+                                            <div class="font-weight-bold">{{ $c->title }}</div>
+                                            <div class="mini-muted">{{ \Illuminate\Support\Str::limit($c->description, 55) }}</div>
+                                          </td>
+                                          <td>
+                                            {!! ($c->status ?? 0)
+                          ? '<span class="badge badge-success">Active</span>'
+                          : '<span class="badge badge-danger">Inactive</span>' !!}
+                                          </td>
+                                          <td class="text-right">
+                                            <a href="{{ route('admin.courses.show', $c->id) }}" class="btn btn-sm btn-outline-info"
+                                              onclick="event.stopPropagation()">Detail</a>
+                                          </td>
+                                        </tr>
                         @empty
                           <tr>
                             <td colspan="3" class="text-center py-4">No courses found</td>
@@ -351,17 +400,17 @@
                   </thead>
                   <tbody>
                     @forelse(($myCourses ?? []) as $c)
-                      <tr class="click-row" onclick="window.location='{{ route('trainer.courses.show', $c->id) }}'">
-                        <td>
-                          <div class="font-weight-bold">{{ $c->title }}</div>
-                          <div class="mini-muted">{{ \Illuminate\Support\Str::limit($c->description, 60) }}</div>
-                        </td>
-                        <td>
-                          {!! ($c->status ?? 0)
-                              ? '<span class="badge badge-success">Active</span>'
-                              : '<span class="badge badge-danger">Inactive</span>' !!}
-                        </td>
-                      </tr>
+                                <tr class="click-row" onclick="window.location='{{ route('trainer.courses.show', $c->id) }}'">
+                                  <td>
+                                    <div class="font-weight-bold">{{ $c->title }}</div>
+                                    <div class="mini-muted">{{ \Illuminate\Support\Str::limit($c->description, 60) }}</div>
+                                  </td>
+                                  <td>
+                                    {!! ($c->status ?? 0)
+                      ? '<span class="badge badge-success">Active</span>'
+                      : '<span class="badge badge-danger">Inactive</span>' !!}
+                                  </td>
+                                </tr>
                     @empty
                       <tr>
                         <td colspan="2" class="text-center py-4">No courses found</td>
@@ -432,8 +481,8 @@
             <div class="col-lg-6 mb-3">
               <div class="card chart-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                  <h4 class="mb-0">Courses vs Users (Admin trend)</h4>
-                  <span class="mini-muted">If 0, ignore</span>
+                <h4 class="mb-0">Active vs Inactive Enrollments (7 days)</h4>
+                <span class="mini-muted">My trend</span>
                 </div>
                 <div class="card-body">
                   <div id="schart2" class="chart-sm"></div>
@@ -458,17 +507,17 @@
                   </thead>
                   <tbody>
                     @forelse(($enrolledCourses ?? []) as $c)
-                      <tr class="click-row" onclick="window.location='{{ route('student.courses.show', $c->id) }}'">
-                        <td>
-                          <div class="font-weight-bold">{{ $c->title }}</div>
-                          <div class="mini-muted">{{ \Illuminate\Support\Str::limit($c->description, 60) }}</div>
-                        </td>
-                        <td>
-                          {!! ($c->status ?? 0)
-                              ? '<span class="badge badge-success">Active</span>'
-                              : '<span class="badge badge-danger">Inactive</span>' !!}
-                        </td>
-                      </tr>
+                                <tr class="click-row" onclick="window.location='{{ route('student.courses.show', $c->id) }}'">
+                                  <td>
+                                    <div class="font-weight-bold">{{ $c->title }}</div>
+                                    <div class="mini-muted">{{ \Illuminate\Support\Str::limit($c->description, 60) }}</div>
+                                  </td>
+                                  <td>
+                                    {!! ($c->status ?? 0)
+                      ? '<span class="badge badge-success">Active</span>'
+                      : '<span class="badge badge-danger">Inactive</span>' !!}
+                                  </td>
+                                </tr>
                     @empty
                       <tr>
                         <td colspan="2" class="text-center py-4">No enrollments</td>
@@ -492,6 +541,8 @@
 
   @php
     $labels = $labels ?? [];
+
+    // admin series (optional)
     $usersSeries = $usersSeries ?? [];
     $coursesSeries = $coursesSeries ?? [];
 
@@ -501,26 +552,122 @@
     $activeSeries = $activeSeries ?? [];
     $inactiveSeries = $inactiveSeries ?? [];
 
+    // trainer series
     $myCoursesSeries = $myCoursesSeries ?? [];
     $myActiveCoursesSeries = $myActiveCoursesSeries ?? [];
 
     $myEnrollSeries = $myEnrollSeries ?? [];
+
+    $myActiveEnrollSeries = $myActiveEnrollSeries ?? [];
+    $myInactiveEnrollSeries = $myInactiveEnrollSeries ?? [];
   @endphp
 
+@push('scripts')
+  <script src="{{ asset('assets/bundles/apexcharts/apexcharts.min.js') }}"></script>
+
   <script>
-    const labels = @json($labels);
-    const usersSeries = @json($usersSeries);
-    const coursesSeries = @json($coursesSeries);
+    // ---------------- DATA ----------------
+    const labels = @json($labels ?? []);
 
-    const rolePie = @json($rolePie);
-    const roleWeekSeries = @json($roleWeekSeries);
+    const usersSeries = @json($usersSeries ?? []);
+    const coursesSeries = @json($coursesSeries ?? []);
 
-    const activeSeries = @json($activeSeries);
-    const inactiveSeries = @json($inactiveSeries);
+    const myCoursesSeries = @json($myCoursesSeries ?? []);
+    const myActiveCoursesSeries = @json($myActiveCoursesSeries ?? []);
 
-    const myCoursesSeries = @json($myCoursesSeries);
-    const myActiveCoursesSeries = @json($myActiveCoursesSeries);
+    const myEnrollSeries = @json($myEnrollSeries ?? []);
 
-    const myEnrollSeries = @json($myEnrollSeries);
+    const myActiveEnrollSeries = @json($myActiveEnrollSeries);
+    const myInactiveEnrollSeries = @json($myInactiveEnrollSeries);
+
+    // ---------------- HELPERS ----------------
+    function renderNoData(el, text = 'No data available') {
+      if (!el) return;
+      el.innerHTML = `<div class="text-center text-muted py-4">${text}</div>`;
+    }
+
+    function hasAnyData(seriesInput) {
+      if (!seriesInput) return false;
+
+      // If array of numbers
+      if (Array.isArray(seriesInput) && seriesInput.every(v => typeof v !== 'object')) {
+        return seriesInput.some(v => Number(v) > 0);
+      }
+
+      // If array of arrays (multi series)
+      if (Array.isArray(seriesInput) && seriesInput.some(v => Array.isArray(v))) {
+        return seriesInput.flat().some(v => Number(v) > 0);
+      }
+
+      return false;
+    }
+
+    function safeRenderChart(elId, options, seriesCheck, noDataText) {
+      const el = document.querySelector(elId);
+      if (!el) return;
+
+      if (!hasAnyData(seriesCheck)) {
+        renderNoData(el, noDataText || 'No data available');
+        return;
+      }
+
+      try {
+        const chart = new ApexCharts(el, options);
+        chart.render();
+      } catch (e) {
+        console.error('Chart render error:', e);
+        renderNoData(el, 'Chart failed to load');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+      // ---------------- TRAINER ----------------
+      safeRenderChart('#tchart1', {
+        chart: { type: 'area', height: 220, toolbar: { show: false } },
+        series: [{ name: 'My Courses', data: myCoursesSeries }],
+        xaxis: { categories: labels },
+        stroke: { curve: 'smooth', width: 3 },
+        dataLabels: { enabled: false },
+        grid: { strokeDashArray: 4 }
+      }, myCoursesSeries, 'No courses created in last 7 days');
+
+      // ✅ trainer 2nd chart different type (bar)
+      safeRenderChart('#tchart2', {
+        chart: { type: 'bar', height: 220, toolbar: { show: false } },
+        series: [{ name: 'My Active Courses', data: myActiveCoursesSeries }],
+        xaxis: { categories: labels },
+        plotOptions: { bar: { borderRadius: 6, columnWidth: '45%' } },
+        dataLabels: { enabled: false },
+        grid: { strokeDashArray: 4 }
+      }, myActiveCoursesSeries, 'No active courses created in last 7 days');
+
+
+      // ---------------- STUDENT ----------------
+      // schart1: My Enrollments (bar)
+      safeRenderChart('#schart1', {
+        chart: { type: 'bar', height: 220, toolbar: { show: false } },
+        series: [{ name: 'My Enrollments', data: myEnrollSeries }],
+        xaxis: { categories: labels },
+        plotOptions: { bar: { borderRadius: 6, columnWidth: '45%' } },
+        dataLabels: { enabled: false },
+        grid: { strokeDashArray: 4 }
+      }, myEnrollSeries, 'No enrollments in last 7 days');
+
+      // schart2: Users vs Courses (line comparison)
+      safeRenderChart('#schart2', {
+        chart: { type: 'line', height: 220, toolbar: { show: false } },
+        series: [
+          { name: 'Users', data: usersSeries },
+          { name: 'Courses', data: coursesSeries }
+        ],
+        xaxis: { categories: labels },
+        stroke: { curve: 'smooth', width: 3 },
+        dataLabels: { enabled: false },
+        grid: { strokeDashArray: 4 },
+        legend: { position: 'top' }
+      }, [usersSeries, coursesSeries], 'No trend data available');
+
+    });
   </script>
 @endpush

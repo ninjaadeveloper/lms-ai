@@ -21,7 +21,14 @@ class User extends Authenticatable
     ];
 
     public function courses()
-{
-    return $this->belongsToMany(\App\Models\Course::class)->withTimestamps();
-}
+    {
+        return $this->belongsToMany(\App\Models\Course::class)->withTimestamps();
+    }
+
+     // student enrolled courses
+     public function enrolledCourses()
+     {
+         return $this->belongsToMany(Course::class, 'course_user')
+             ->withTimestamps();
+     }
 }
