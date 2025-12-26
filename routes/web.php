@@ -31,7 +31,6 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // ---------------- ADMIN ----------------
-// ---------------- ADMIN ----------------
 Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
@@ -43,44 +42,56 @@ Route::middleware(['auth', 'role:admin'])
         Route::resource('/users', UserController::class);
 
         // ✅ ADMIN ALL ENROLLMENTS (Sidebar page) - NO PARAM
-        Route::get('/enrollments', [CourseController::class, 'allEnrollments'])
-            ->name('enrollments.index');
+        Route::get('/enrollments', [CourseController::class, 'allEnrollments'])->name('enrollments.index');
 
-        // ✅ ADMIN PER-COURSE ENROLLMENTS - requires {course}
-        Route::get('/courses/{course}/enrollments', [CourseController::class, 'enrollments'])
-            ->name('courses.enrollments');
+        // ✅ ADMIN PER-COURSE ENROLLMENTS
+        Route::get('/courses/{course}/enrollments', [CourseController::class, 'enrollments'])->name('courses.enrollments');
 
-        // Optional admin enroll/remove
-        Route::post('/courses/{course}/enroll', [CourseController::class, 'enrollStudent'])
-            ->name('courses.enroll');
-        Route::delete('/courses/{course}/remove/{student}', [CourseController::class, 'removeStudent'])
-            ->name('courses.removeStudent');
+        // enroll/remove
+        Route::post('/courses/{course}/enroll', [CourseController::class, 'enrollStudent'])->name('courses.enroll');
+        Route::delete('/courses/{course}/remove/{student}', [CourseController::class, 'removeStudent'])->name('courses.removeStudent');
 
-        // Courses resource
+        // Courses
         Route::resource('/courses', CourseController::class);
 
-        // AI course description (optional)
-        Route::post('/courses/{course}/ai-description', [CourseController::class, 'generateAiDescription'])
-            ->name('courses.aiDescription');
+        // AI course description
+        Route::post('/courses/{course}/ai-description', [CourseController::class, 'generateAiDescription'])->name('courses.aiDescription');
 
-        // Quizzes
-        Route::resource('/quizzes', QuizController::class);
+        // ✅ QUIZZES (ADMIN)
+        Route::get('/quizzes', [QuizController::class, 'index'])->name('quizzes.index');
+
+        // ✅ Step-1: Select Course (no param)
+        Route::get('/quizzes/create', [QuizController::class, 'create'])->name('quizzes.create');
+
+        // ✅ Step-2: Generator UI (course required)
+        Route::get('/courses/{course}/quizzes/create', [QuizController::class, 'createForCourse'])
+            ->name('courses.quizzes.create');
+
+        // ✅ AI generate (AJAX)
+        Route::post('/courses/{course}/quizzes/generate', [QuizController::class, 'generate'])
+            ->name('courses.quizzes.generate');
+
+        // ✅ Save selected (POST)
+        Route::post('/courses/{course}/quizzes', [QuizController::class, 'store'])
+            ->name('courses.quizzes.store');
+
+        // optional view/delete
+        Route::get('/quizzes/{quiz}', [QuizController::class, 'show'])->name('quizzes.show');
+        Route::delete('/quizzes/{quiz}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
+
+        // (optional)
         Route::get('/quizzes/{quiz}/results', [QuizController::class, 'results'])->name('quizzes.results');
 
         // AI Assistant
         Route::get('/ai-assistant', [AiAssistantController::class, 'index'])->name('ai.index');
         Route::post('/ai-assistant/send', [AiAssistantController::class, 'send'])->name('ai.send');
 
-        // ✅ Feedback (ADMIN)
+        // Feedback (ADMIN)
         Route::get('/feedback-list', [FeedbackController::class, 'adminIndex'])->name('feedback.admin');
-
         Route::get('/feedback/{feedback}', [FeedbackController::class, 'adminShow'])->name('feedback.show');
         Route::patch('/feedback/{feedback}/status', [FeedbackController::class, 'updateStatus'])->name('feedback.status');
-
-        // ✅ Extra: if blade POST bhej rahi ho to 405 na aaye
         Route::post('/feedback/{feedback}/status', [FeedbackController::class, 'updateStatus'])->name('feedback.status.post');
     });
-
 
 // ---------------- TRAINER ----------------
 Route::middleware(['auth', 'role:trainer'])
@@ -90,18 +101,32 @@ Route::middleware(['auth', 'role:trainer'])
 
         Route::get('/dashboard', fn() => redirect()->route('dashboard'))->name('dashboard');
 
-        // ✅ TRAINER ALL ENROLLMENTS (Sidebar page) - NO PARAM
-        Route::get('/enrollments', [CourseController::class, 'trainerEnrollmentsIndex'])
-            ->name('enrollments.index');
+        // enrollments
+        Route::get('/enrollments', [CourseController::class, 'trainerEnrollmentsIndex'])->name('enrollments.index');
+        Route::get('/courses/{course}/enrollments', [CourseController::class, 'trainerEnrollments'])->name('courses.enrollments');
 
-        // ✅ TRAINER PER-COURSE ENROLLMENTS - requires {course}
-        Route::get('/courses/{course}/enrollments', [CourseController::class, 'trainerEnrollments'])
-            ->name('courses.enrollments');
-
-        // Courses (trainer)
+        // courses
         Route::resource('/courses', CourseController::class)
             ->only(['index', 'show', 'edit', 'update'])
             ->names('courses');
+
+        // ✅ QUIZZES (TRAINER)
+        Route::get('/quizzes', [QuizController::class, 'index'])->name('quizzes.index');
+
+        // ✅ Select Course
+        Route::get('/quizzes/create', [QuizController::class, 'create'])->name('quizzes.create');
+
+        // ✅ Generator UI
+        Route::get('/courses/{course}/quizzes/create', [QuizController::class, 'createForCourse'])
+            ->name('courses.quizzes.create');
+
+        Route::post('/courses/{course}/quizzes/generate', [QuizController::class, 'generate'])
+            ->name('courses.quizzes.generate');
+
+        Route::post('/courses/{course}/quizzes', [QuizController::class, 'store'])
+            ->name('courses.quizzes.store');
+
+        Route::get('/quizzes/{quiz}', [QuizController::class, 'show'])->name('quizzes.show');
 
         // Feedback
         Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
@@ -124,8 +149,7 @@ Route::middleware(['auth', 'role:student'])
             ->only(['index', 'show'])
             ->names('courses');
 
-        Route::post('/courses/{course}/enroll', [CourseController::class, 'studentEnroll'])
-            ->name('courses.enroll');
+        Route::post('/courses/{course}/enroll', [CourseController::class, 'studentEnroll'])->name('courses.enroll');
 
         // Feedback
         Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
@@ -136,9 +160,7 @@ Route::middleware(['auth', 'role:student'])
         Route::post('/ai-assistant/send', [AiAssistantController::class, 'send'])->name('ai.send');
     });
 
-// ---------------------------------------------------------------------
-// ✅ ROUTE ALIASES (TEMP FIX) for old blades using route('courses.index')
-// ---------------------------------------------------------------------
+// ✅ (optional) route aliases (agar old blades use kar rahe ho)
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/courses', fn() => redirect()->route('admin.courses.index'))->name('courses.index');
     Route::get('/courses/create', fn() => redirect()->route('admin.courses.create'))->name('courses.create');

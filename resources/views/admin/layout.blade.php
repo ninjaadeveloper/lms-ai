@@ -84,142 +84,177 @@
 
 
       <div class="main-sidebar sidebar-style-2">
-        <aside id="sidebar-wrapper">
-          <div class="sidebar-brand">
-            <a href="#">
-              <img alt="image" src="{{ asset('assets/img/logo.png') }}" class="header-logo" />
-              <span class="logo-name">LMS - AI</span>
-            </a>
-          </div>
-
-          @php $role = auth()->user()->role ?? 'student'; @endphp
-
-          <ul class="sidebar-menu">
-            <li class="menu-header">Dashboard</li>
-
-            {{-- Dashboard --}}
-            <li class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-              <a class="nav-link" href="{{ route('dashboard') }}">
-                <i data-feather="monitor"></i><span>Dashboard</span>
+        <div class="main-sidebar sidebar-style-2">
+          <aside id="sidebar-wrapper">
+            <div class="sidebar-brand">
+              <a href="#">
+                <img alt="image" src="{{ asset('assets/img/logo.png') }}" class="header-logo" />
+                <span class="logo-name">LMS - AI</span>
               </a>
-            </li>
+            </div>
 
-            {{-- ADMIN ONLY: Users dropdown --}}
-            @if($role === 'admin')
-              <li class="dropdown {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+            @php $role = auth()->user()->role ?? 'student'; @endphp
+
+            <ul class="sidebar-menu">
+              <li class="menu-header">Dashboard</li>
+
+              {{-- Dashboard --}}
+              <li class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('dashboard') }}">
+                  <i data-feather="monitor"></i><span>Dashboard</span>
+                </a>
+              </li>
+
+              {{-- ADMIN ONLY: Users dropdown --}}
+              @if($role === 'admin')
+                <li class="dropdown {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                  <a href="#" class="menu-toggle nav-link has-dropdown">
+                    <i data-feather="users"></i><span>Users</span>
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="nav-link" href="{{ route('admin.users.index') }}">All Users</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.users.create') }}">Add User</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.users.trainers') }}">Trainers</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.users.students') }}">Students</a></li>
+                  </ul>
+                </li>
+              @endif
+
+              {{-- COURSES --}}
+              @if($role === 'admin')
+                {{-- ✅ ADMIN Courses dropdown --}}
+                <li class="dropdown {{ request()->routeIs('admin.courses.*', 'admin.enrollments.*') ? 'active' : '' }}">
+                  <a href="#" class="menu-toggle nav-link has-dropdown">
+                    <i data-feather="book-open"></i><span>Courses</span>
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="nav-link" href="{{ route('admin.courses.index') }}">Course List</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.courses.create') }}">Add Course</a></li>
+
+                    {{-- ✅ All enrollments list (no param) --}}
+                    @if(Route::has('admin.enrollments.index'))
+                      <li><a class="nav-link" href="{{ route('admin.enrollments.index') }}">Enrollments (All)</a></li>
+                    @endif
+
+                    {{-- Optional: only when viewing a course show page --}}
+                    @if(request()->routeIs('admin.courses.show') && isset($course) && Route::has('admin.courses.enrollments'))
+                      <li>
+                        <a class="nav-link" href="{{ route('admin.courses.enrollments', $course->id) }}">
+                          This Course Enrollments
+                        </a>
+                      </li>
+                    @endif
+                  </ul>
+                </li>
+
+              @elseif($role === 'trainer')
+                {{-- ✅ TRAINER Courses dropdown --}}
+                <li
+                  class="dropdown {{ request()->routeIs('trainer.courses.*', 'trainer.enrollments.*') ? 'active' : '' }}">
+                  <a href="#" class="menu-toggle nav-link has-dropdown">
+                    <i data-feather="book-open"></i><span>Courses</span>
+                  </a>
+
+                  <ul class="dropdown-menu">
+                    <li><a class="nav-link" href="{{ route('trainer.courses.index') }}">My Courses</a></li>
+
+                    {{-- ✅ SAFE: trainer enrollments index (NO param) --}}
+                    @if(Route::has('trainer.enrollments.index'))
+                      <li><a class="nav-link" href="{{ route('trainer.enrollments.index') }}">Enrollments (All)</a></li>
+                    @endif
+
+                    {{-- ✅ Course enrollments ONLY when on course show + course exists --}}
+                    @if(request()->routeIs('trainer.courses.show') && isset($course) && Route::has('trainer.courses.enrollments'))
+                      <li>
+                        <a class="nav-link" href="{{ route('trainer.courses.enrollments', $course->id) }}">
+                          This Course Enrollments
+                        </a>
+                      </li>
+                    @endif
+                  </ul>
+                </li>
+
+              @else
+                {{-- ✅ STUDENT simple --}}
+                <li class="{{ request()->routeIs('student.courses.*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ route('student.courses.index') }}">
+                    <i data-feather="book-open"></i><span>Courses</span>
+                  </a>
+                </li>
+              @endif
+
+
+              {{-- ✅ QUIZZES (ADMIN + TRAINER) --}}
+              @if($role === 'admin')
+                <li
+                  class="dropdown {{ request()->routeIs('admin.quizzes.*', 'admin.courses.quizzes.*') ? 'active' : '' }}">
+                  <a href="#" class="menu-toggle nav-link has-dropdown">
+                    <i data-feather="help-circle"></i><span>Quizzes</span>
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="nav-link" href="{{ route('admin.quizzes.index') }}">Quiz List</a></li>
+                    <li><a class="nav-link" href="{{ route('admin.quizzes.create') }}">Create / Generate Quiz</a></li>
+                  </ul>
+                </li>
+
+              @elseif($role === 'trainer')
+                <li
+                  class="dropdown {{ request()->routeIs('trainer.quizzes.*', 'trainer.courses.quizzes.*') ? 'active' : '' }}">
+                  <a href="#" class="menu-toggle nav-link has-dropdown">
+                    <i data-feather="help-circle"></i><span>Quizzes</span>
+                  </a>
+                  <ul class="dropdown-menu">
+                    <li><a class="nav-link" href="{{ route('trainer.quizzes.index') }}">My Quizzes</a></li>
+                    <li><a class="nav-link" href="{{ route('trainer.quizzes.create') }}">Create / Generate Quiz</a></li>
+                  </ul>
+                </li>
+              @endif
+
+
+
+              {{-- AI Assistant (ALL) --}}
+              <li class="{{ request()->routeIs('admin.ai.*', 'trainer.ai.*', 'student.ai.*') ? 'active' : '' }}">
+                <a class="nav-link"
+                  href="{{ $role === 'admin' ? route('admin.ai.index') : ($role === 'trainer' ? route('trainer.ai.index') : route('student.ai.index')) }}">
+                  <i data-feather="cpu"></i><span>AI Assistant</span>
+                </a>
+              </li>
+
+              {{-- Feedback (ALL) --}}
+              <li
+                class="{{ request()->routeIs('admin.feedback.*', 'trainer.feedback.*', 'student.feedback.*') ? 'active' : '' }}">
+                <a class="nav-link"
+                  href="{{ $role === 'admin' ? route('admin.feedback.admin') : ($role === 'trainer' ? route('trainer.feedback.index') : route('student.feedback.index')) }}">
+                  <i data-feather="message-square"></i><span>Feedback</span>
+                </a>
+              </li>
+
+              {{-- Settings --}}
+              <li class="dropdown {{ request()->routeIs('profile.*', 'password.*') ? 'active' : '' }}">
                 <a href="#" class="menu-toggle nav-link has-dropdown">
-                  <i data-feather="users"></i><span>Users</span>
+                  <i data-feather="settings"></i><span>Settings</span>
                 </a>
                 <ul class="dropdown-menu">
-                  <li><a class="nav-link" href="{{ route('admin.users.index') }}">All Users</a></li>
-                  <li><a class="nav-link" href="{{ route('admin.users.create') }}">Add User</a></li>
-                  <li><a class="nav-link" href="{{ route('admin.users.trainers') }}">Trainers</a></li>
-                  <li><a class="nav-link" href="{{ route('admin.users.students') }}">Students</a></li>
-                </ul>
-              </li>
-            @endif
-
-            {{-- COURSES --}}
-            @if($role === 'admin')
-              {{-- ✅ ADMIN dropdown --}}
-              <li class="dropdown {{ request()->routeIs('admin.courses.*', 'admin.enrollments.*') ? 'active' : '' }}">
-                <a href="#" class="menu-toggle nav-link has-dropdown">
-                  <i data-feather="book-open"></i><span>Courses</span>
-                </a>
-                <ul class="dropdown-menu">
-                  <li><a class="nav-link" href="{{ route('admin.courses.index') }}">Course List</a></li>
-                  <li><a class="nav-link" href="{{ route('admin.courses.create') }}">Add Course</a></li>
-
-                  {{-- ✅ All enrollments list (no param) --}}
-                  <li><a class="nav-link" href="{{ route('admin.enrollments.index') }}">Enrollments (All)</a></li>
-
-                  {{-- Optional: only when viewing a course show page --}}
-                  @if(request()->routeIs('admin.courses.show') && isset($course))
-                    <li>
-                      <a class="nav-link" href="{{ route('admin.courses.enrollments', $course->id) }}">
-                        This Course Enrollments
-                      </a>
-                    </li>
-                  @endif
+                  <li><a class="nav-link" href="{{ route('profile.edit') }}">Profile</a></li>
+                  <li><a class="nav-link" href="{{ route('password.change') }}">Change Password</a></li>
                 </ul>
               </li>
 
-            @elseif($role === 'trainer')
-              {{-- ✅ TRAINER dropdown --}}
-              <li class="dropdown {{ request()->routeIs('trainer.courses.*', 'trainer.enrollments.*') ? 'active' : '' }}">
-                <a href="#" class="menu-toggle nav-link has-dropdown">
-                  <i data-feather="book-open"></i><span>Courses</span>
+              {{-- Logout --}}
+              <li>
+                <a href="#" class="nav-link"
+                  onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                  <i data-feather="log-out"></i><span>Logout</span>
                 </a>
-
-                <ul class="dropdown-menu">
-                  <li><a class="nav-link" href="{{ route('trainer.courses.index') }}">My Courses</a></li>
-
-                  {{-- ✅ SAFE: trainer enrollments index (NO param) --}}
-                  @if(Route::has('trainer.enrollments.index'))
-                    <li><a class="nav-link" href="{{ route('trainer.enrollments.index') }}">Enrollments (All)</a></li>
-                  @endif
-
-                  {{-- ✅ Course enrollments ONLY when on course show + course exists --}}
-                  @if(request()->routeIs('trainer.courses.show') && isset($course) && Route::has('trainer.courses.enrollments'))
-                    <li>
-                      <a class="nav-link" href="{{ route('trainer.courses.enrollments', $course->id) }}">
-                        This Course Enrollments
-                      </a>
-                    </li>
-                  @endif
-                </ul>
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
+                  @csrf
+                </form>
               </li>
 
-            @else
-              {{-- ✅ STUDENT simple --}}
-              <li class="{{ request()->routeIs('student.courses.*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('student.courses.index') }}">
-                  <i data-feather="book-open"></i><span>Courses</span>
-                </a>
-              </li>
-            @endif
+            </ul>
+          </aside>
+        </div>
 
-            {{-- AI Assistant (ALL) --}}
-            <li class="{{ request()->routeIs('admin.ai.*', 'trainer.ai.*', 'student.ai.*') ? 'active' : '' }}">
-              <a class="nav-link"
-                href="{{ $role === 'admin' ? route('admin.ai.index') : ($role === 'trainer' ? route('trainer.ai.index') : route('student.ai.index')) }}">
-                <i data-feather="cpu"></i><span>AI Assistant</span>
-              </a>
-            </li>
-
-            {{-- Feedback (ALL) --}}
-            <li
-              class="{{ request()->routeIs('admin.feedback.*', 'trainer.feedback.*', 'student.feedback.*') ? 'active' : '' }}">
-              <a class="nav-link"
-                href="{{ $role === 'admin' ? route('admin.feedback.admin') : ($role === 'trainer' ? route('trainer.feedback.index') : route('student.feedback.index')) }}">
-                <i data-feather="message-square"></i><span>Feedback</span>
-              </a>
-            </li>
-
-            {{-- Settings --}}
-            <li class="dropdown {{ request()->routeIs('profile.*', 'password.*') ? 'active' : '' }}">
-              <a href="#" class="menu-toggle nav-link has-dropdown">
-                <i data-feather="settings"></i><span>Settings</span>
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="nav-link" href="{{ route('profile.edit') }}">Profile</a></li>
-                <li><a class="nav-link" href="{{ route('password.change') }}">Change Password</a></li>
-              </ul>
-            </li>
-
-            {{-- Logout --}}
-            <li>
-              <a href="#" class="nav-link"
-                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                <i data-feather="log-out"></i><span>Logout</span>
-              </a>
-              <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">
-                @csrf
-              </form>
-            </li>
-
-          </ul>
-        </aside>
 
 
       </div>

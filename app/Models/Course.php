@@ -11,8 +11,13 @@ class Course extends Model
 
     // Mass assignable fields
     protected $fillable = [
-        'title','description','duration_hours','status',
-  'trainer_id','video_url','pdf_file'
+        'title',
+        'description',
+        'duration_hours',
+        'status',
+        'trainer_id',
+        'video_url',
+        'pdf_file'
     ];
 
     public function trainer()
@@ -20,11 +25,17 @@ class Course extends Model
         return $this->belongsTo(User::class, 'trainer_id');
     }
 
-     // students enrolled
-     public function students()
-     {
-         return $this->belongsToMany(User::class, 'course_user')
-             ->withTimestamps();
-     }
+    // students enrolled
+    public function students()
+    {
+        return $this->belongsToMany(User::class, 'course_user')
+            ->withTimestamps();
+    }
+
+    public function quizzes()
+    {
+        return $this->hasMany(Quiz::class);
+    }
+
 
 }

@@ -103,7 +103,8 @@ TXT;
         $listUrl = "https://generativelanguage.googleapis.com/v1beta/models?key={$apiKey}";
         $res = Http::timeout(20)->get($listUrl);
 
-        if (!$res->successful()) return null;
+        if (!$res->successful())
+            return null;
 
         $models = $res->json('models') ?? [];
         foreach ($models as $m) {
@@ -111,7 +112,8 @@ TXT;
             $name = $m['name'] ?? null; // like "models/gemini-pro"
             $methods = $m['supportedGenerationMethods'] ?? [];
 
-            if (!$name) continue;
+            if (!$name)
+                continue;
 
             // we need generateContent support
             if (in_array('generateContent', $methods, true)) {
