@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 25, 2025 at 08:07 PM
+-- Generation Time: Dec 26, 2025 at 07:32 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -199,7 +199,9 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (4, '2025_12_20_072503_create_courses_table', 1),
 (5, '2025_12_22_152056_add_trainer_video_pdf_to_courses_table', 2),
 (6, '2025_12_25_125805_create_course_user_table', 3),
-(7, '2025_12_25_175915_create_feedback_table', 4);
+(7, '2025_12_25_175915_create_feedback_table', 4),
+(8, '2025_12_26_154348_create_quizzes_table', 5),
+(9, '2025_12_26_154433_create_quiz_questions_table', 5);
 
 -- --------------------------------------------------------
 
@@ -212,6 +214,77 @@ CREATE TABLE `password_reset_tokens` (
   `token` varchar(255) NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `quizzes`
+--
+
+CREATE TABLE `quizzes` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `course_id` bigint(20) UNSIGNED NOT NULL,
+  `created_by` bigint(20) UNSIGNED NOT NULL,
+  `creator_role` varchar(20) NOT NULL,
+  `topic` varchar(255) DEFAULT NULL,
+  `total_questions` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `quizzes`
+--
+
+INSERT INTO `quizzes` (`id`, `course_id`, `created_by`, `creator_role`, `topic`, `total_questions`, `created_at`, `updated_at`) VALUES
+(2, 4, 1, 'admin', 'PHP', 10, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
+(3, 1, 1, 'admin', 'Python', 10, '2025-12-26 13:30:03', '2025-12-26 13:30:03');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `quiz_questions`
+--
+
+CREATE TABLE `quiz_questions` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `quiz_id` bigint(20) UNSIGNED NOT NULL,
+  `question` text NOT NULL,
+  `option_a` varchar(255) NOT NULL,
+  `option_b` varchar(255) NOT NULL,
+  `option_c` varchar(255) NOT NULL,
+  `option_d` varchar(255) NOT NULL,
+  `correct_option` enum('A','B','C','D') NOT NULL,
+  `sort_order` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `quiz_questions`
+--
+
+INSERT INTO `quiz_questions` (`id`, `quiz_id`, `question`, `option_a`, `option_b`, `option_c`, `option_d`, `correct_option`, `sort_order`, `created_at`, `updated_at`) VALUES
+(11, 2, 'What is the correct way to start a PHP script?', '<?php', '<script php>', '<?', '<!--php', 'A', 1, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
+(12, 2, 'How do you declare a variable in PHP?', 'var $name;', '$name = \"value\";', 'name = \"value\";', 'variable $name;', 'B', 2, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
+(13, 2, 'Which keyword is used to handle multiple conditions in PHP?', 'else if', 'elseif', 'switch', 'All of the above', 'D', 3, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
+(14, 2, 'Which loop is best suited for iterating over arrays in PHP?', 'for', 'while', 'foreach', 'do-while', 'C', 4, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
+(15, 2, 'Which superglobal variable is used to collect data from an HTML form submitted with the POST method?', '$_GET', '$_POST', '$_REQUEST', '$_SESSION', 'B', 5, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
+(16, 2, 'What data type would `true` or `false` represent in PHP?', 'String', 'Integer', 'Boolean', 'Float', 'C', 6, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
+(17, 2, 'How do you write a single-line comment in PHP?', '/* This is a comment */', '// This is a comment', '# This is a comment', 'Both B and C', 'D', 7, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
+(18, 2, 'What is the result of `10 % 3` in PHP?', '3', '1', '0', '3.33', 'B', 8, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
+(19, 2, 'Which symbols are used to enclose PHP code within an HTML file?', '<?php ... ?>', '<% ... %>', '{{ ... }}', '<!-- ... -->', 'A', 9, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
+(20, 2, 'Which of the following is a valid \'if\' statement in PHP?', 'if ($x == 5) { ... }', 'if $x == 5 then { ... }', 'if ($x equals 5) { ... }', 'if ($x is 5) { ... }', 'A', 10, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
+(21, 3, 'Python is primarily known for its:', 'Complex syntax', 'Simplicity and readability', 'Low-level memory management', 'Strict type declarations', 'B', 1, '2025-12-26 13:30:03', '2025-12-26 13:30:03'),
+(22, 3, 'Which of the following is NOT a common application area for Python?', 'Web development', 'Operating system kernel development', 'Data analysis', 'Machine learning', 'B', 2, '2025-12-26 13:30:03', '2025-12-26 13:30:03'),
+(23, 3, 'Python is often recommended for:', 'Only advanced programmers', 'Beginners due to its ease of learning', 'Hardware programming', 'Real-time embedded systems', 'B', 3, '2025-12-26 13:30:03', '2025-12-26 13:30:03'),
+(24, 3, 'What type of programming language is Python?', 'Assembly language', 'Low-level language', 'High-level language', 'Machine language', 'C', 4, '2025-12-26 13:30:03', '2025-12-26 13:30:03'),
+(25, 3, 'A key characteristic of Python\'s syntax is its:', 'Use of semicolons to end statements', 'Reliance on curly braces for code blocks', 'Easy-to-understand and clean structure', 'Mandatory variable type declarations', 'C', 5, '2025-12-26 13:30:03', '2025-12-26 13:30:03'),
+(26, 3, 'What kind of community support does Python benefit from?', 'Very limited', 'Only for paid users', 'A small, specialized group', 'A large and active community', 'D', 6, '2025-12-26 13:30:03', '2025-12-26 13:30:03'),
+(27, 3, 'Regarding its capabilities, Python is described as:', 'Only suitable for small scripts', 'Powerful enough for advanced projects', 'Exclusively for academic research', 'Limited to simple automation tasks', 'B', 7, '2025-12-26 13:30:03', '2025-12-26 13:30:03'),
+(28, 3, 'How is Python\'s popularity generally described?', 'Niche and declining', 'One of the most popular programming languages', 'Primarily used in specific regions', 'Rarely used outside of data science', 'B', 8, '2025-12-26 13:30:03', '2025-12-26 13:30:03'),
+(29, 3, 'Python is widely used in which of these fields?', 'Game engine development', 'Operating system design', 'Automation', 'Microcontroller programming', 'C', 9, '2025-12-26 13:30:03', '2025-12-26 13:30:03'),
+(30, 3, 'What makes Python a good choice for various applications, including building apps and analyzing data?', 'Its strict performance limitations', 'Its lack of external libraries', 'Its versatility and ease of use', 'Its proprietary nature', 'C', 10, '2025-12-26 13:30:03', '2025-12-26 13:30:03');
 
 -- --------------------------------------------------------
 
@@ -233,9 +306,7 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('7ySpa8wRGmETtIXSipxsCuUCq5ies87kz1BQokwH', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiT2F3MXBZRWhQOXJhWmlIbThjMEpTTmRvbXY5bmtnNDg1OHNqdnB6SiI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6NDE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9hZG1pbi9mZWVkYmFjay1saXN0IjtzOjU6InJvdXRlIjtzOjIwOiJhZG1pbi5mZWVkYmFjay5hZG1pbiI7fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjE7fQ==', 1766689525),
-('L09yQlLlWobW9edWEGRe7ERSI41499ExEBANlHeu', 4, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiYktBUG1CNTRqMzhhN21qZ2tJb05kVmlBMGR6UFExOG5lR1R1S3VoUCI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6MzE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9kYXNoYm9hcmQiO3M6NToicm91dGUiO3M6OToiZGFzaGJvYXJkIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6NDt9', 1766689452),
-('W5xcebdfIYej8xsOyYrWRooAlAt4swv44f9BcIVN', 2, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoicUtYUG1nZGtZd1NVaUd1N3AyemdEdW56SEk4aW5tTnNWZjZHQkxsZyI7czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6MzE6Imh0dHA6Ly9sb2NhbGhvc3Q6ODAwMC9kYXNoYm9hcmQiO3M6NToicm91dGUiO3M6OToiZGFzaGJvYXJkIjt9czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6Mjt9', 1766689536);
+('PSFLc8GMdw0wIgtfDueLyKB4SkK1hmYDoqbEqiFG', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoid25HOThBQ2s1ZElFWDdmZXg2aTRpR0VwejVMZGFsMWVXS2lQc2l5TyI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6MzU6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9hZG1pbi9xdWl6emVzIjtzOjU6InJvdXRlIjtzOjE5OiJhZG1pbi5xdWl6emVzLmluZGV4Ijt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTt9', 1766773817);
 
 -- --------------------------------------------------------
 
@@ -338,6 +409,21 @@ ALTER TABLE `password_reset_tokens`
   ADD PRIMARY KEY (`email`);
 
 --
+-- Indexes for table `quizzes`
+--
+ALTER TABLE `quizzes`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `quizzes_course_id_index` (`course_id`),
+  ADD KEY `quizzes_created_by_index` (`created_by`);
+
+--
+-- Indexes for table `quiz_questions`
+--
+ALTER TABLE `quiz_questions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `quiz_questions_quiz_id_index` (`quiz_id`);
+
+--
 -- Indexes for table `sessions`
 --
 ALTER TABLE `sessions`
@@ -390,7 +476,19 @@ ALTER TABLE `jobs`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT for table `quizzes`
+--
+ALTER TABLE `quizzes`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `quiz_questions`
+--
+ALTER TABLE `quiz_questions`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -420,6 +518,19 @@ ALTER TABLE `course_students`
 --
 ALTER TABLE `feedback`
   ADD CONSTRAINT `feedback_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `quizzes`
+--
+ALTER TABLE `quizzes`
+  ADD CONSTRAINT `quizzes_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `quizzes_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `quiz_questions`
+--
+ALTER TABLE `quiz_questions`
+  ADD CONSTRAINT `quiz_questions_quiz_id_foreign` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
