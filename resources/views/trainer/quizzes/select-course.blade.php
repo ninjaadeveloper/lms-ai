@@ -1,47 +1,63 @@
 @extends('../admin.layout')
-
 @section('content')
 <div class="main-content">
   <section class="section">
     <div class="section-body">
 
-      <div class="card shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h4 class="mb-0">Create Quiz</h4>
-          <a href="{{ auth()->user()->role==='admin' ? route('admin.quizzes.index') : route('trainer.quizzes.index') }}"
-             class="btn btn-light btn-sm">
-            <i class="fas fa-arrow-left mr-1"></i> Back
-          </a>
-        </div>
+      <div class="row">
+        <div class="col-12">
+          <div class="card shadow-sm">
 
-        <div class="card-body">
-          <div class="form-group">
-            <label>Select Course</label>
-            <select id="course_id" class="form-control">
-              <option value="">-- Select --</option>
-              @foreach($courses as $c)
-                <option value="{{ $c->id }}">{{ $c->title }}</option>
-              @endforeach
-            </select>
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h4 class="mb-0">Select Course</h4>
+              <a href="{{ route('trainer.quizzes.index') }}" class="btn btn-light btn-sm">
+                <i class="fas fa-arrow-left mr-1"></i> Back to Quizzes
+              </a>
+            </div>
+
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0">
+                  <thead>
+                    <tr>
+                      <th style="width:70px;">#</th>
+                      <th>Course</th>
+                      <th class="text-center" style="width:220px;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @forelse($courses as $i => $course)
+                      <tr>
+                        <td>{{ $i + 1 }}</td>
+                        <td>
+                          <strong>{{ $course->title }}</strong>
+                          <br><small class="text-muted">Course ID: {{ $course->id }}</small>
+                        </td>
+                        <td class="text-center">
+                          <a href="{{ route('trainer.courses.quizzes.create', $course->id) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-magic mr-1"></i> Generate Quiz
+                          </a>
+                        </td>
+                      </tr>
+                    @empty
+                      <tr>
+                        <td colspan="3" class="text-center text-muted py-4">No courses found.</td>
+                      </tr>
+                    @endforelse
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- <div class="card-footer text-right">
+              <small class="text-muted">Trainer ko sirf apne courses show honge.</small>
+            </div> -->
+
           </div>
-
-          <button class="btn btn-primary" id="goBtn">
-            <i class="fas fa-bolt mr-1"></i> Continue to Generator
-          </button>
         </div>
       </div>
 
     </div>
   </section>
 </div>
-
-<script>
-document.getElementById('goBtn').addEventListener('click', function () {
-  const id = document.getElementById('course_id').value;
-  if (!id) return alert('Please select a course');
-
-  const base = "{{ auth()->user()->role==='admin' ? url('admin') : url('trainer') }}";
-  window.location = `${base}/courses/${id}/quizzes/create`;
-});
-</script>
 @endsection

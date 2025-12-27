@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\AiAssistantController;
 use App\Http\Controllers\Admin\FeedbackController;
+use App\Http\Controllers\Student\StudentQuizController;
+
 
 use App\Http\Controllers\ProfileController;
 
@@ -128,6 +130,9 @@ Route::middleware(['auth', 'role:trainer'])
 
         Route::get('/quizzes/{quiz}', [QuizController::class, 'show'])->name('quizzes.show');
 
+        Route::delete('/quizzes/{quiz}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
+
+
         // Feedback
         Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
         Route::post('/feedback', [FeedbackController::class, 'store'])->name('feedback.store');
@@ -158,6 +163,27 @@ Route::middleware(['auth', 'role:student'])
         // AI Assistant
         Route::get('/ai-assistant', [AiAssistantController::class, 'index'])->name('ai.index');
         Route::post('/ai-assistant/send', [AiAssistantController::class, 'send'])->name('ai.send');
+
+        Route::get('/quizzes', [StudentQuizController::class, 'index'])
+            ->name('quizzes.index');
+
+        Route::get('/quizzes/{quiz}', [StudentQuizController::class, 'show'])
+            ->name('quizzes.show');
+
+        Route::post('/quizzes/{quiz}/submit', [StudentQuizController::class, 'submit'])
+            ->name('quizzes.submit');
+
+        Route::get('/quizzes/{quiz}/result', [StudentQuizController::class, 'result'])
+            ->name('quizzes.result');
+
+        // ✅ NEW: PDF Download
+        Route::get('/quizzes/{quiz}/result/pdf', [StudentQuizController::class, 'downloadPdf'])
+            ->name('quizzes.result.pdf');
+
+        // ✅ (agar detail page already bana rahe ho)
+        Route::get('/quizzes/{quiz}/result/detail', [StudentQuizController::class, 'resultDetail'])
+            ->name('quizzes.result.detail');
+
     });
 
 // ✅ (optional) route aliases (agar old blades use kar rahe ho)

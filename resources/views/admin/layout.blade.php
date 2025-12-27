@@ -210,6 +210,13 @@
                 </li>
               @endif
 
+              @if($role === 'student')
+                <li class="{{ request()->routeIs('student.quizzes.*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ route('student.quizzes.index') }}">
+                    <i data-feather="help-circle"></i><span>Quizzes</span>
+                  </a>
+                </li>
+              @endif
 
 
               {{-- AI Assistant (ALL) --}}

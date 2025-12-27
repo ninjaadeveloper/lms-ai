@@ -16,13 +16,18 @@ class QuizController extends Controller
     // ✅ List (admin: all, trainer: own)
     public function index(Request $request)
     {
+        $user = auth()->user();
+
         $q = Quiz::query()->with('course')->orderByDesc('id');
 
-        // trainer only: show own created quizzes
+        // ✅ Trainer: sirf apne courses ke quizzes (admin + trainer dono)
         if (auth()->user()->role === 'trainer') {
-            $q->where('created_by', auth()->id());
+            $q->whereHas('course', function ($cq) {
+                $cq->where('trainer_id', auth()->id());
+            });
         }
 
+        // optional filter
         if ($request->filled('course_id')) {
             $q->where('course_id', $request->course_id);
         }
@@ -31,19 +36,15 @@ class QuizController extends Controller
 
         // dropdown courses
         $coursesQuery = Course::orderByDesc('id')->select(['id', 'title']);
-
-        // trainer only: only his courses
-        if (auth()->user()->role === 'trainer') {
-            if (\Schema::hasColumn('courses', 'trainer_id')) {
-                $coursesQuery->where('trainer_id', auth()->id());
-            }
+        if ($user->role === 'trainer') {
+            $coursesQuery->where('trainer_id', $user->id);
         }
-
         $courses = $coursesQuery->get();
 
-        $viewPrefix = auth()->user()->role === 'trainer' ? 'trainer' : 'admin';
+        $viewPrefix = $user->role === 'trainer' ? 'trainer' : 'admin';
         return view($viewPrefix . '.quizzes.index', compact('quizzes', 'courses'));
     }
+
 
     // ✅ /admin/quizzes/create  OR /trainer/quizzes/create  => Select Course Page
     public function create()
@@ -440,34 +441,34 @@ class QuizController extends Controller
     }
     public function show(Quiz $quiz)
     {
-        // trainer restriction: only his created quizzes OR his course quizzes
-        if (auth()->user()->role === 'trainer') {
-            abort_if($quiz->created_by != auth()->id(), 403);
-        }
-
         $quiz->load(['course', 'questions']);
+
+        // ✅ trainer restriction: quiz ka course usi trainer ka ho
+        if (auth()->user()->role === 'trainer') {
+            abort_if(($quiz->course->trainer_id ?? null) != auth()->id(), 403);
+        }
 
         $viewPrefix = auth()->user()->role === 'trainer' ? 'trainer' : 'admin';
         return view($viewPrefix . '.quizzes.show', compact('quiz'));
     }
 
     public function destroy(Quiz $quiz)
-{
-    // trainer restriction (sirf apna quiz delete kar sake)
-    if (auth()->user()->role === 'trainer') {
-        abort_if($quiz->created_by != auth()->id(), 403);
+    {
+        $quiz->load('course');
+
+        if (auth()->user()->role === 'trainer') {
+            // ✅ trainer sirf apne course ka quiz delete kare
+            abort_if(($quiz->course->trainer_id ?? null) != auth()->id(), 403);
+
+            // ✅ optional: trainer admin-created quiz delete na kar sake
+            abort_if(($quiz->creator_role ?? '') === 'admin', 403);
+        }
+
+        // delete questions first (if cascade not set)
+        $quiz->questions()->delete();
+        $quiz->delete();
+
+        return redirect()->back()->with('success', 'Quiz deleted successfully!');
     }
 
-    // load course for extra safety (optional)
-    $quiz->load('course');
-
-    // ✅ delete questions first (agar FK cascade nahi hai)
-    QuizQuestion::where('quiz_id', $quiz->id)->delete();
-
-    // ✅ delete quiz
-    $quiz->delete();
-
-    $prefix = auth()->user()->role === 'trainer' ? 'trainer.' : 'admin.';
-    return redirect()->route($prefix.'quizzes.index')->with('success', 'Quiz deleted successfully!');
-}
 }
