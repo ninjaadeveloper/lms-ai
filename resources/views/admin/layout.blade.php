@@ -183,29 +183,55 @@
                 </li>
               @endif
 
-
-              {{-- ✅ QUIZZES (ADMIN + TRAINER) --}}
+              {{-- ADMIN --}}
               @if($role === 'admin')
                 <li
-                  class="dropdown {{ request()->routeIs('admin.quizzes.*', 'admin.courses.quizzes.*') ? 'active' : '' }}">
+                  class="dropdown {{ request()->routeIs('admin.quizzes.*', 'admin.courses.quizzes.*', 'admin.quiz.attempts.*') ? 'active' : '' }}">
                   <a href="#" class="menu-toggle nav-link has-dropdown">
                     <i data-feather="help-circle"></i><span>Quizzes</span>
                   </a>
                   <ul class="dropdown-menu">
-                    <li><a class="nav-link" href="{{ route('admin.quizzes.index') }}">Quiz List</a></li>
-                    <li><a class="nav-link" href="{{ route('admin.quizzes.create') }}">Create / Generate Quiz</a></li>
+                    <li>
+                      <a class="nav-link" href="{{ route('admin.quizzes.index') }}">
+                        Quiz List
+                      </a>
+                    </li>
+                    <li>
+                      <a class="nav-link" href="{{ route('admin.quizzes.create') }}">
+                        Create / Generate Quiz
+                      </a>
+                    </li>
+                    <li>
+                      <a class="nav-link" href="{{ route('admin.quiz.attempts.index') }}">
+                        Quiz Results
+                      </a>
+                    </li>
                   </ul>
                 </li>
 
+                {{-- TRAINER --}}
               @elseif($role === 'trainer')
                 <li
-                  class="dropdown {{ request()->routeIs('trainer.quizzes.*', 'trainer.courses.quizzes.*') ? 'active' : '' }}">
+                  class="dropdown {{ request()->routeIs('trainer.quizzes.*', 'trainer.courses.quizzes.*', 'trainer.quiz.attempts.*') ? 'active' : '' }}">
                   <a href="#" class="menu-toggle nav-link has-dropdown">
                     <i data-feather="help-circle"></i><span>Quizzes</span>
                   </a>
                   <ul class="dropdown-menu">
-                    <li><a class="nav-link" href="{{ route('trainer.quizzes.index') }}">My Quizzes</a></li>
-                    <li><a class="nav-link" href="{{ route('trainer.quizzes.create') }}">Create / Generate Quiz</a></li>
+                    <li>
+                      <a class="nav-link" href="{{ route('trainer.quizzes.index') }}">
+                        My Quizzes
+                      </a>
+                    </li>
+                    <li>
+                      <a class="nav-link" href="{{ route('trainer.quizzes.create') }}">
+                        Create / Generate Quiz
+                      </a>
+                    </li>
+                    <li>
+                      <a class="nav-link" href="{{ route('trainer.quiz.attempts.index') }}">
+                        Quiz Results
+                      </a>
+                    </li>
                   </ul>
                 </li>
               @endif

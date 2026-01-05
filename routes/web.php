@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\QuizController;
+use App\Http\Controllers\Admin\QuizAttemptController;
 use App\Http\Controllers\Admin\AiAssistantController;
 use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Controllers\Student\StudentQuizController;
@@ -84,6 +85,19 @@ Route::middleware(['auth', 'role:admin'])
         // (optional)
         Route::get('/quizzes/{quiz}/results', [QuizController::class, 'results'])->name('quizzes.results');
 
+        Route::get(
+            '/quiz-attempts',
+            [QuizAttemptController::class, 'index']
+        )->name('quiz.attempts.index');
+
+        Route::get('/quiz-attempts/{quiz}', [QuizAttemptController::class, 'show'])
+            ->name('quiz.attempts.show');
+
+        Route::get(
+            '/quiz-attempts/{quiz}/{attempt}',
+            [QuizAttemptController::class, 'studentDetail']
+        )->name('quiz.attempts.student.detail');
+
         // AI Assistant
         Route::get('/ai-assistant', [AiAssistantController::class, 'index'])->name('ai.index');
         Route::post('/ai-assistant/send', [AiAssistantController::class, 'send'])->name('ai.send');
@@ -132,6 +146,18 @@ Route::middleware(['auth', 'role:trainer'])
 
         Route::delete('/quizzes/{quiz}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
 
+        Route::get(
+            '/quiz-attempts',
+            [QuizAttemptController::class, 'index']
+        )->name('quiz.attempts.index');
+
+        Route::get('/quiz-attempts/{quiz}', [QuizAttemptController::class, 'show'])
+            ->name('quiz.attempts.show');
+
+        Route::get(
+            '/quiz-attempts/{quiz}/{attempt}',
+            [QuizAttemptController::class, 'studentDetail']
+        )->name('quiz.attempts.student.detail');
 
         // Feedback
         Route::get('/feedback', [FeedbackController::class, 'index'])->name('feedback.index');
