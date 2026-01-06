@@ -14,33 +14,49 @@ class QuizAttemptController extends Controller
     {
         $user = auth()->user();
 
-        // ✅ Quizzes list (trainer = apne courses ke, admin = sab)
         $quizQuery = Quiz::with('course')
             ->withCount('attempts')
             ->orderByDesc('id');
 
         if ($user->role === 'trainer') {
-            $quizQuery->whereHas('course', function ($q) use ($user) {
-                $q->where('trainer_id', $user->id);
-            });
+            $quizQuery->whereHas(
+                'course',
+                fn($q) =>
+                $q->where('trainer_id', $user->id)
+            );
         }
 
         $quizzes = $quizQuery->paginate(10);
 
-        // ✅ Cards stats
         $totalQuizzes = $quizQuery->count();
-        $totalAttempts = \App\Models\QuizAttempt::when(
+        $totalAttempts = QuizAttempt::when(
             $user->role === 'trainer',
-            fn($q) => $q->whereHas('quiz.course', fn($c) => $c->where('trainer_id', $user->id))
+            fn($q) => $q->whereHas(
+                'quiz.course',
+                fn($c) => $c->where('trainer_id', $user->id)
+            )
         )->count();
+
+        // ✅ ADMIN STATS
+        $avgScore = QuizAttempt::avg('score_percent');
+        $pass = QuizAttempt::where('score_percent', '>=', 50)->count();
+        $fail = QuizAttempt::where('score_percent', '<', 50)->count();
 
         return view(
             $user->role === 'trainer'
             ? 'trainer.quiz-attempts.index'
             : 'admin.quiz-attempts.index',
-            compact('quizzes', 'totalQuizzes', 'totalAttempts')
+            compact(
+                'quizzes',
+                'totalQuizzes',
+                'totalAttempts',
+                'avgScore',
+                'pass',
+                'fail'
+            )
         );
     }
+
 
 
 
@@ -53,16 +69,23 @@ class QuizAttemptController extends Controller
             abort_if($quiz->course->trainer_id != $user->id, 403);
         }
 
-        $attempts = QuizAttempt::with(['student'])
+        $attempts = QuizAttempt::with('student')
             ->where('quiz_id', $quiz->id)
             ->orderByDesc('score_percent')
-            ->get(); // 👈 Collection (NOT paginate)
+            ->get();
+
+        // 📊 Score distribution
+        $distribution = [
+            'high' => $attempts->where('score_percent', '>=', 80)->count(),
+            'medium' => $attempts->whereBetween('score_percent', [50, 79])->count(),
+            'low' => $attempts->where('score_percent', '<', 50)->count(),
+        ];
 
         return view(
             $user->role === 'trainer'
             ? 'trainer.quiz-attempts.show'
             : 'admin.quiz-attempts.show',
-            compact('quiz', 'attempts')
+            compact('quiz', 'attempts', 'distribution')
         );
     }
 
@@ -89,26 +112,26 @@ class QuizAttemptController extends Controller
                 403
             );
         }
-    
+
         // safety check
         abort_if($attempt->quiz_id !== $quiz->id, 404);
-    
+
         $quiz->load('questions');
-    
+
         $attempt->load([
             'student',
             'answers' // ✅ answers zaroori
         ]);
-    
+
         // ✅ SAME AS STUDENT CONTROLLER
         $answersMap = $attempt->answers->keyBy('question_id');
-    
+
         return view(
             'trainer.quiz-attempts.student-detail',
             compact('attempt', 'quiz', 'answersMap')
         );
     }
-    
+
 
 
 
