@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 26, 2025 at 07:32 PM
+-- Generation Time: Jan 06, 2026 at 03:10 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -73,7 +73,7 @@ INSERT INTO `courses` (`id`, `title`, `description`, `video_url`, `pdf_file`, `a
 (1, 'Python', 'Python is a versatile, high-level programming language known for its simplicity and readability. It\'s great for beginners but powerful enough for advanced projects. Python is used in web development, data analysis, machine learning, automation, and more. With its easy-to-understand syntax and large community support, it\'s one of the most popular programming languages in the world today. Whether you\'re building apps or analyzing data, Python is a great choice!', 'https://youtu.be/K5KVEU3aaeQ?si=5SmQfAL2A0E_AXNP', 'course_pdfs/l2CHfL3S4rN4F4ergxrYGVH2n8pokm8Ts3x8AZGN.pdf', NULL, 12, 1, '2025-12-22 10:08:44', '2025-12-25 07:51:09', 4),
 (2, 'Javascript', 'JavaScript is a dynamic, high-level programming language that’s mainly used for creating interactive and dynamic websites. It runs in the browser, allowing developers to build things like animations, games, interactive forms, and even full web apps. It works alongside HTML and CSS to create modern web pages. JavaScript is also widely used on the server-side (with frameworks like Node.js). It\'s super versatile and can be used for both front-end (what the user sees) and back-end (server-side) development, making it one of the core technologies of web development.', NULL, NULL, NULL, 10, 1, '2025-12-22 10:09:18', '2025-12-25 13:52:23', 4),
 (3, 'Html & CSS', 'HTML (HyperText Markup Language) is the foundation of web pages. It defines the structure of a webpage by using \"tags\" to create elements like headings, paragraphs, images, links, and more. HTML is like the skeleton of a webpage, telling the browser how to display content.\r\n\r\nCSS (Cascading Style Sheets) is used to control the appearance and layout of those HTML elements. With CSS, you can change things like colors, fonts, spacing, and positioning. While HTML defines the structure, CSS makes it look good and ensures it’s responsive across different screen sizes. Together, HTML and CSS are the building blocks for creating attractive, functional websites.', NULL, NULL, NULL, 6, 1, '2025-12-22 10:10:04', '2025-12-25 13:58:18', 4),
-(4, 'PHP with MySQL', 'Learn the fundamentals of PHP to build dynamic websites and web applications. This course covers PHP syntax, control structures, forms handling, database integration with MySQL, and basic object-oriented programming. By the end, you\'ll be able to create interactive web applications using PHP and MySQL.', 'https://youtu.be/zZ6vybT1HQs?si=1tTYBs9Z56okDj5o', NULL, NULL, 18, 0, '2025-12-23 05:52:03', '2025-12-25 08:54:14', 5);
+(4, 'PHP with MySQL', 'Learn the fundamentals of PHP to build dynamic websites and web applications. This course covers PHP syntax, control structures, forms handling, database integration with MySQL, and basic object-oriented programming. By the end, you\'ll be able to create interactive web applications using PHP and MySQL.', 'https://youtu.be/zZ6vybT1HQs?si=1tTYBs9Z56okDj5o', NULL, NULL, 18, 1, '2025-12-23 05:52:03', '2025-12-27 02:08:23', 5);
 
 -- --------------------------------------------------------
 
@@ -201,7 +201,9 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (6, '2025_12_25_125805_create_course_user_table', 3),
 (7, '2025_12_25_175915_create_feedback_table', 4),
 (8, '2025_12_26_154348_create_quizzes_table', 5),
-(9, '2025_12_26_154433_create_quiz_questions_table', 5);
+(9, '2025_12_26_154433_create_quiz_questions_table', 5),
+(10, '2025_12_27_071725_create_quiz_attempts_table', 6),
+(11, '2025_12_27_071802_create_quiz_attempt_answers_table', 6);
 
 -- --------------------------------------------------------
 
@@ -237,8 +239,91 @@ CREATE TABLE `quizzes` (
 --
 
 INSERT INTO `quizzes` (`id`, `course_id`, `created_by`, `creator_role`, `topic`, `total_questions`, `created_at`, `updated_at`) VALUES
-(2, 4, 1, 'admin', 'PHP', 10, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
-(3, 1, 1, 'admin', 'Python', 10, '2025-12-26 13:30:03', '2025-12-26 13:30:03');
+(3, 1, 1, 'admin', 'Python', 10, '2025-12-26 13:30:03', '2025-12-26 13:30:03'),
+(4, 3, 1, 'admin', 'Basics of HTML', 10, '2025-12-27 02:02:59', '2025-12-27 02:02:59'),
+(5, 2, 4, 'trainer', 'Basics of Javascript', 10, '2025-12-27 02:05:23', '2025-12-27 02:05:23'),
+(6, 4, 5, 'trainer', 'Basics of PHP', 10, '2025-12-27 02:11:18', '2025-12-27 02:11:18');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `quiz_attempts`
+--
+
+CREATE TABLE `quiz_attempts` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `quiz_id` bigint(20) UNSIGNED NOT NULL,
+  `student_id` bigint(20) UNSIGNED NOT NULL,
+  `total_questions` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `correct` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `wrong` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `score_percent` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `submitted_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `quiz_attempts`
+--
+
+INSERT INTO `quiz_attempts` (`id`, `quiz_id`, `student_id`, `total_questions`, `correct`, `wrong`, `score_percent`, `submitted_at`, `created_at`, `updated_at`) VALUES
+(1, 4, 2, 10, 10, 0, 100, '2025-12-27 05:17:30', '2025-12-27 05:17:30', '2025-12-27 05:17:30'),
+(2, 3, 2, 10, 2, 8, 20, '2025-12-27 06:07:14', '2025-12-27 06:07:13', '2025-12-27 06:07:14'),
+(3, 3, 3, 10, 2, 8, 20, '2026-01-05 10:50:38', '2026-01-05 10:50:38', '2026-01-05 10:50:38');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `quiz_attempt_answers`
+--
+
+CREATE TABLE `quiz_attempt_answers` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `attempt_id` bigint(20) UNSIGNED NOT NULL,
+  `question_id` bigint(20) UNSIGNED NOT NULL,
+  `selected_option` varchar(1) DEFAULT NULL,
+  `correct_option` varchar(1) DEFAULT NULL,
+  `is_correct` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `quiz_attempt_answers`
+--
+
+INSERT INTO `quiz_attempt_answers` (`id`, `attempt_id`, `question_id`, `selected_option`, `correct_option`, `is_correct`, `created_at`, `updated_at`) VALUES
+(1, 1, 31, 'A', 'A', 1, '2025-12-27 05:17:30', '2025-12-27 05:17:30'),
+(2, 1, 32, 'B', 'B', 1, '2025-12-27 05:17:30', '2025-12-27 05:17:30'),
+(3, 1, 33, 'A', 'A', 1, '2025-12-27 05:17:30', '2025-12-27 05:17:30'),
+(4, 1, 34, 'C', 'C', 1, '2025-12-27 05:17:30', '2025-12-27 05:17:30'),
+(5, 1, 35, 'B', 'B', 1, '2025-12-27 05:17:30', '2025-12-27 05:17:30'),
+(6, 1, 36, 'D', 'D', 1, '2025-12-27 05:17:30', '2025-12-27 05:17:30'),
+(7, 1, 37, 'B', 'B', 1, '2025-12-27 05:17:30', '2025-12-27 05:17:30'),
+(8, 1, 38, 'A', 'A', 1, '2025-12-27 05:17:30', '2025-12-27 05:17:30'),
+(9, 1, 39, 'C', 'C', 1, '2025-12-27 05:17:30', '2025-12-27 05:17:30'),
+(10, 1, 40, 'C', 'C', 1, '2025-12-27 05:17:30', '2025-12-27 05:17:30'),
+(11, 2, 21, 'A', 'B', 0, '2025-12-27 06:07:13', '2025-12-27 06:07:13'),
+(12, 2, 22, 'D', 'B', 0, '2025-12-27 06:07:14', '2025-12-27 06:07:14'),
+(13, 2, 23, 'C', 'B', 0, '2025-12-27 06:07:14', '2025-12-27 06:07:14'),
+(14, 2, 24, NULL, 'C', 0, '2025-12-27 06:07:14', '2025-12-27 06:07:14'),
+(15, 2, 25, 'B', 'C', 0, '2025-12-27 06:07:14', '2025-12-27 06:07:14'),
+(16, 2, 26, 'A', 'D', 0, '2025-12-27 06:07:14', '2025-12-27 06:07:14'),
+(17, 2, 27, 'B', 'B', 1, '2025-12-27 06:07:14', '2025-12-27 06:07:14'),
+(18, 2, 28, 'A', 'B', 0, '2025-12-27 06:07:14', '2025-12-27 06:07:14'),
+(19, 2, 29, 'B', 'C', 0, '2025-12-27 06:07:14', '2025-12-27 06:07:14'),
+(20, 2, 30, 'C', 'C', 1, '2025-12-27 06:07:14', '2025-12-27 06:07:14'),
+(21, 3, 21, 'B', 'B', 1, '2026-01-05 10:50:38', '2026-01-05 10:50:38'),
+(22, 3, 22, 'C', 'B', 0, '2026-01-05 10:50:38', '2026-01-05 10:50:38'),
+(23, 3, 23, 'B', 'B', 1, '2026-01-05 10:50:38', '2026-01-05 10:50:38'),
+(24, 3, 24, 'A', 'C', 0, '2026-01-05 10:50:38', '2026-01-05 10:50:38'),
+(25, 3, 25, 'B', 'C', 0, '2026-01-05 10:50:38', '2026-01-05 10:50:38'),
+(26, 3, 26, 'C', 'D', 0, '2026-01-05 10:50:38', '2026-01-05 10:50:38'),
+(27, 3, 27, 'D', 'B', 0, '2026-01-05 10:50:38', '2026-01-05 10:50:38'),
+(28, 3, 28, NULL, 'B', 0, '2026-01-05 10:50:38', '2026-01-05 10:50:38'),
+(29, 3, 29, 'A', 'C', 0, '2026-01-05 10:50:38', '2026-01-05 10:50:38'),
+(30, 3, 30, 'D', 'C', 0, '2026-01-05 10:50:38', '2026-01-05 10:50:38');
 
 -- --------------------------------------------------------
 
@@ -265,16 +350,6 @@ CREATE TABLE `quiz_questions` (
 --
 
 INSERT INTO `quiz_questions` (`id`, `quiz_id`, `question`, `option_a`, `option_b`, `option_c`, `option_d`, `correct_option`, `sort_order`, `created_at`, `updated_at`) VALUES
-(11, 2, 'What is the correct way to start a PHP script?', '<?php', '<script php>', '<?', '<!--php', 'A', 1, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
-(12, 2, 'How do you declare a variable in PHP?', 'var $name;', '$name = \"value\";', 'name = \"value\";', 'variable $name;', 'B', 2, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
-(13, 2, 'Which keyword is used to handle multiple conditions in PHP?', 'else if', 'elseif', 'switch', 'All of the above', 'D', 3, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
-(14, 2, 'Which loop is best suited for iterating over arrays in PHP?', 'for', 'while', 'foreach', 'do-while', 'C', 4, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
-(15, 2, 'Which superglobal variable is used to collect data from an HTML form submitted with the POST method?', '$_GET', '$_POST', '$_REQUEST', '$_SESSION', 'B', 5, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
-(16, 2, 'What data type would `true` or `false` represent in PHP?', 'String', 'Integer', 'Boolean', 'Float', 'C', 6, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
-(17, 2, 'How do you write a single-line comment in PHP?', '/* This is a comment */', '// This is a comment', '# This is a comment', 'Both B and C', 'D', 7, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
-(18, 2, 'What is the result of `10 % 3` in PHP?', '3', '1', '0', '3.33', 'B', 8, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
-(19, 2, 'Which symbols are used to enclose PHP code within an HTML file?', '<?php ... ?>', '<% ... %>', '{{ ... }}', '<!-- ... -->', 'A', 9, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
-(20, 2, 'Which of the following is a valid \'if\' statement in PHP?', 'if ($x == 5) { ... }', 'if $x == 5 then { ... }', 'if ($x equals 5) { ... }', 'if ($x is 5) { ... }', 'A', 10, '2025-12-26 13:28:34', '2025-12-26 13:28:34'),
 (21, 3, 'Python is primarily known for its:', 'Complex syntax', 'Simplicity and readability', 'Low-level memory management', 'Strict type declarations', 'B', 1, '2025-12-26 13:30:03', '2025-12-26 13:30:03'),
 (22, 3, 'Which of the following is NOT a common application area for Python?', 'Web development', 'Operating system kernel development', 'Data analysis', 'Machine learning', 'B', 2, '2025-12-26 13:30:03', '2025-12-26 13:30:03'),
 (23, 3, 'Python is often recommended for:', 'Only advanced programmers', 'Beginners due to its ease of learning', 'Hardware programming', 'Real-time embedded systems', 'B', 3, '2025-12-26 13:30:03', '2025-12-26 13:30:03'),
@@ -284,7 +359,37 @@ INSERT INTO `quiz_questions` (`id`, `quiz_id`, `question`, `option_a`, `option_b
 (27, 3, 'Regarding its capabilities, Python is described as:', 'Only suitable for small scripts', 'Powerful enough for advanced projects', 'Exclusively for academic research', 'Limited to simple automation tasks', 'B', 7, '2025-12-26 13:30:03', '2025-12-26 13:30:03'),
 (28, 3, 'How is Python\'s popularity generally described?', 'Niche and declining', 'One of the most popular programming languages', 'Primarily used in specific regions', 'Rarely used outside of data science', 'B', 8, '2025-12-26 13:30:03', '2025-12-26 13:30:03'),
 (29, 3, 'Python is widely used in which of these fields?', 'Game engine development', 'Operating system design', 'Automation', 'Microcontroller programming', 'C', 9, '2025-12-26 13:30:03', '2025-12-26 13:30:03'),
-(30, 3, 'What makes Python a good choice for various applications, including building apps and analyzing data?', 'Its strict performance limitations', 'Its lack of external libraries', 'Its versatility and ease of use', 'Its proprietary nature', 'C', 10, '2025-12-26 13:30:03', '2025-12-26 13:30:03');
+(30, 3, 'What makes Python a good choice for various applications, including building apps and analyzing data?', 'Its strict performance limitations', 'Its lack of external libraries', 'Its versatility and ease of use', 'Its proprietary nature', 'C', 10, '2025-12-26 13:30:03', '2025-12-26 13:30:03'),
+(31, 4, 'What does HTML stand for?', 'HyperText Markup Language', 'High-level Text Management Language', 'Hyperlink and Text Markup', 'Home Tool Markup Language', 'A', 1, '2025-12-27 02:02:59', '2025-12-27 02:02:59'),
+(32, 4, 'What is the primary purpose of HTML?', 'To style the appearance of a webpage', 'To define the structure and content of a webpage', 'To add interactivity to a webpage', 'To manage server-side logic', 'B', 2, '2025-12-27 02:02:59', '2025-12-27 02:02:59'),
+(33, 4, 'Which of the following is the correct declaration for an HTML5 document?', '`<!DOCTYPE html>`', '`<DOCTYPE html>`', '`<html DOCTYPE>`', '`<declare html>`', 'A', 3, '2025-12-27 02:02:59', '2025-12-27 02:02:59'),
+(34, 4, 'Which HTML tag is used to define the root of an HTML document?', '`<head>`', '`<body>`', '`<html>`', '`<root>`', 'C', 4, '2025-12-27 02:02:59', '2025-12-27 02:02:59'),
+(35, 4, 'Which HTML tag is used to create a paragraph?', '`<para>`', '`<p>`', '`<text>`', '`<paragraph>`', 'B', 5, '2025-12-27 02:02:59', '2025-12-27 02:02:59'),
+(36, 4, 'Which HTML tag is used for the largest heading?', '`<h6>`', '`<head>`', '`<heading>`', '`<h1>`', 'D', 6, '2025-12-27 02:02:59', '2025-12-27 02:02:59'),
+(37, 4, 'What does the `<head>` section of an HTML document typically contain?', 'The visible content of the webpage', 'Metadata about the HTML document', 'Scripts for interactivity', 'Styles for the webpage', 'B', 7, '2025-12-27 02:02:59', '2025-12-27 02:02:59'),
+(38, 4, 'Which HTML tag is used to insert an image?', '`<img>`', '`<picture>`', '`<image>`', '`<src>`', 'A', 8, '2025-12-27 02:02:59', '2025-12-27 02:02:59'),
+(39, 4, 'How do you create a comment in HTML?', '`// This is a comment`', '`/* This is a comment */`', '`<!-- This is a comment -->`', '`# This is a comment`', 'C', 9, '2025-12-27 02:02:59', '2025-12-27 02:02:59'),
+(40, 4, 'What is an HTML attribute used for?', 'To define the styling of an element', 'To add interactivity to an element', 'To provide additional information about an element', 'To create new HTML elements', 'C', 10, '2025-12-27 02:02:59', '2025-12-27 02:02:59'),
+(41, 5, 'What is JavaScript primarily used for?', 'Styling web pages', 'Structuring web content', 'Adding interactivity to web pages', 'Managing server databases', 'C', 1, '2025-12-27 02:05:23', '2025-12-27 02:05:23'),
+(42, 5, 'Where does JavaScript typically execute?', 'On the server', 'In the browser', 'Within the operating system kernel', 'On a dedicated hardware device', 'B', 2, '2025-12-27 02:05:23', '2025-12-27 02:05:23'),
+(43, 5, 'Which keyword is used to declare a variable whose value can be reassigned in modern JavaScript?', 'const', 'var', 'let', 'static', 'C', 3, '2025-12-27 02:05:23', '2025-12-27 02:05:23'),
+(44, 5, 'How do you define a function in JavaScript?', 'function myFunction()', 'def myFunction()', 'myFunction = function()', 'func myFunction()', 'A', 4, '2025-12-27 02:05:23', '2025-12-27 02:05:23'),
+(45, 5, 'What is the correct way to link an external JavaScript file named \'script.js\'?', '<script name=\'script.js\'>', '<link rel=\'javascript\' href=\'script.js\'>', '<script src=\'script.js\'></script>', '<js src=\'script.js\'>', 'C', 5, '2025-12-27 02:05:23', '2025-12-27 02:05:23'),
+(46, 5, 'Which operator performs a strict equality comparison (value and type)?', '==', '!=', '===', '=', 'C', 6, '2025-12-27 02:05:23', '2025-12-27 02:05:23'),
+(47, 5, 'What data type represents true or false values in JavaScript?', 'String', 'Number', 'Boolean', 'Array', 'C', 7, '2025-12-27 02:05:23', '2025-12-27 02:05:23'),
+(48, 5, 'How do you write a single-line comment in JavaScript?', '<!-- comment -->', '/* comment */', '// comment', '# comment', 'C', 8, '2025-12-27 02:05:23', '2025-12-27 02:05:23'),
+(49, 5, 'Which of the following is NOT a primitive data type in JavaScript?', 'String', 'Number', 'Object', 'Boolean', 'C', 9, '2025-12-27 02:05:23', '2025-12-27 02:05:23'),
+(50, 5, 'What method is used to display a message box with an \'OK\' button to the user?', 'console.log()', 'document.write()', 'alert()', 'prompt()', 'C', 10, '2025-12-27 02:05:23', '2025-12-27 02:05:23'),
+(51, 6, 'What is the standard file extension for PHP files?', '.html', '.php', '.js', '.css', 'B', 1, '2025-12-27 02:11:18', '2025-12-27 02:11:18'),
+(52, 6, 'How do you begin a PHP script block in an HTML file?', '<php>', '<?php', '{{php}}', '[php]', 'B', 2, '2025-12-27 02:11:18', '2025-12-27 02:11:18'),
+(53, 6, 'Which character is used to terminate a PHP statement?', '.', ';', ':', ',', 'B', 3, '2025-12-27 02:11:18', '2025-12-27 02:11:18'),
+(54, 6, 'Which function is commonly used to output text in PHP?', 'print()', 'echo()', 'display()', 'output()', 'B', 4, '2025-12-27 02:11:18', '2025-12-27 02:11:18'),
+(55, 6, 'How do you declare and assign a value to a variable in PHP?', 'var $name;', '$name;', 'name = \"value\";', '$name = \"value\";', 'D', 5, '2025-12-27 02:11:18', '2025-12-27 02:11:18'),
+(56, 6, 'Which symbol is used for single-line comments in PHP?', '//', '/*', '<!--', '#', 'A', 6, '2025-12-27 02:11:18', '2025-12-27 02:11:18'),
+(57, 6, 'What is the primary purpose of `include` or `require` statements in PHP?', 'To define functions', 'To connect to a database', 'To embed content from another PHP file', 'To declare variables', 'C', 7, '2025-12-27 02:11:18', '2025-12-27 02:11:18'),
+(58, 6, 'Which of the following is a PHP superglobal variable used to collect form data submitted with the POST method?', '$_GET', '$_SESSION', '$_POST', '$_SERVER', 'C', 8, '2025-12-27 02:11:18', '2025-12-27 02:11:18'),
+(59, 6, 'How do you define a global constant in PHP?', 'const MY_CONSTANT = \"value\";', 'define(\"MY_CONSTANT\", \"value\");', '$MY_CONSTANT = \"value\";', 'constant MY_CONSTANT = \"value\";', 'B', 9, '2025-12-27 02:11:18', '2025-12-27 02:11:18'),
+(60, 6, 'Which operator is used to concatenate two strings in PHP?', '+', '&', '.', '*', 'C', 10, '2025-12-27 02:11:18', '2025-12-27 02:11:18');
 
 -- --------------------------------------------------------
 
@@ -306,7 +411,10 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('PSFLc8GMdw0wIgtfDueLyKB4SkK1hmYDoqbEqiFG', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoid25HOThBQ2s1ZElFWDdmZXg2aTRpR0VwejVMZGFsMWVXS2lQc2l5TyI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6MzU6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9hZG1pbi9xdWl6emVzIjtzOjU6InJvdXRlIjtzOjE5OiJhZG1pbi5xdWl6emVzLmluZGV4Ijt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTt9', 1766773817);
+('2AwoaTYEYfTFDrFKzUQoTac2Ix46KX1s315k0gLC', 2, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiUjJ5SGYwZXo3WWExUnBud1B2OWdJSnZjNnFjQURmaEtRNFF1ZDNVNSI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6MzE6Imh0dHA6Ly9sb2NhbGhvc3Q6ODAwMC9kYXNoYm9hcmQiO3M6NToicm91dGUiO3M6OToiZGFzaGJvYXJkIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6Mjt9', 1767698987),
+('8jP74Qe2EWFzQvRSae7x9NkrHnqDoPBMC19JIam4', 4, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoicDN3aXlOSzd6YXRKeUw1d0RlR2duYU1oazRLSzFIVnpKNjRuSjh5ZSI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6NDc6Imh0dHA6Ly9sb2NhbGhvc3Q6ODAwMC90cmFpbmVyL3F1aXotYXR0ZW1wdHMvNC8xIjtzOjU6InJvdXRlIjtzOjM2OiJ0cmFpbmVyLnF1aXouYXR0ZW1wdHMuc3R1ZGVudC5kZXRhaWwiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aTo0O30=', 1767701060),
+('LFIVHLNkgKDiopMfLGX0dVo5LWdBDnj93MuM56rq', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoic1I2U25hNWptUnhvMG9QN1JmcFU2NDMwQVFOY3ZHS2ZPOG1uSEJBSCI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6NDU6Imh0dHA6Ly9sb2NhbGhvc3Q6ODAwMC9hZG1pbi9xdWl6LWF0dGVtcHRzLzMvMiI7czo1OiJyb3V0ZSI7czozNDoiYWRtaW4ucXVpei5hdHRlbXB0cy5zdHVkZW50LmRldGFpbCI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjE7fQ==', 1767700959),
+('xMPztAwoLwi4iKLqPrO75t9SZ65iqjxGyxafLa2P', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiY3VrUThMN3pMenF3TUlkVFlSOG9RZXF3UVJ1ZHdtTFA1b1RIZWVERyI7czo5OiJfcHJldmlvdXMiO2E6Mjp7czozOiJ1cmwiO3M6MzE6Imh0dHA6Ly9sb2NhbGhvc3Q6ODAwMC9kYXNoYm9hcmQiO3M6NToicm91dGUiO3M6OToiZGFzaGJvYXJkIjt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTt9', 1767708599);
 
 -- --------------------------------------------------------
 
@@ -417,6 +525,22 @@ ALTER TABLE `quizzes`
   ADD KEY `quizzes_created_by_index` (`created_by`);
 
 --
+-- Indexes for table `quiz_attempts`
+--
+ALTER TABLE `quiz_attempts`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `quiz_attempts_quiz_id_student_id_unique` (`quiz_id`,`student_id`),
+  ADD KEY `quiz_attempts_student_id_foreign` (`student_id`);
+
+--
+-- Indexes for table `quiz_attempt_answers`
+--
+ALTER TABLE `quiz_attempt_answers`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `quiz_attempt_answers_attempt_id_question_id_unique` (`attempt_id`,`question_id`),
+  ADD KEY `quiz_attempt_answers_question_id_foreign` (`question_id`);
+
+--
 -- Indexes for table `quiz_questions`
 --
 ALTER TABLE `quiz_questions`
@@ -476,19 +600,31 @@ ALTER TABLE `jobs`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `quizzes`
 --
 ALTER TABLE `quizzes`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `quiz_attempts`
+--
+ALTER TABLE `quiz_attempts`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `quiz_attempt_answers`
+--
+ALTER TABLE `quiz_attempt_answers`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `quiz_questions`
 --
 ALTER TABLE `quiz_questions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -525,6 +661,20 @@ ALTER TABLE `feedback`
 ALTER TABLE `quizzes`
   ADD CONSTRAINT `quizzes_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `quizzes_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `quiz_attempts`
+--
+ALTER TABLE `quiz_attempts`
+  ADD CONSTRAINT `quiz_attempts_quiz_id_foreign` FOREIGN KEY (`quiz_id`) REFERENCES `quizzes` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `quiz_attempts_student_id_foreign` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `quiz_attempt_answers`
+--
+ALTER TABLE `quiz_attempt_answers`
+  ADD CONSTRAINT `quiz_attempt_answers_attempt_id_foreign` FOREIGN KEY (`attempt_id`) REFERENCES `quiz_attempts` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `quiz_attempt_answers_question_id_foreign` FOREIGN KEY (`question_id`) REFERENCES `quiz_questions` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `quiz_questions`

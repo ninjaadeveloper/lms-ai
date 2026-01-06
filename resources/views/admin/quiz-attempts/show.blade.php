@@ -112,9 +112,20 @@
                                         <td>{{ $i + 1 }}</td>
 
                                         <td>
-                                          <strong>{{ $a->student->name }}</strong><br>
-                                          <small class="text-muted">{{ $a->student->email }}</small>
-                                        </td>
+    <strong>{{ $a->student->name }}</strong>
+
+    @if($i === 0)
+        <span class="badge badge-warning ml-2">🥇 Rank 1</span>
+    @elseif($i === 1)
+        <span class="badge badge-secondary ml-2">🥈 Rank 2</span>
+    @elseif($i === 2)
+        <span class="badge badge-dark ml-2">🥉 Rank 3</span>
+    @endif
+
+    <br>
+    <small class="text-muted">{{ $a->student->email }}</small>
+</td>
+
 
                                         <td>
                                           <span class="badge badge-primary p-2">
