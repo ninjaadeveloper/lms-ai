@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Models\Course;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\QuizAttemptAnswer;
@@ -16,7 +17,7 @@ class StudentQuizController extends Controller
         $studentId = auth()->id();
 
         // ✅ enrolled courses ids (adjust if your pivot table name differs)
-        $enrolledCourseIds = \DB::table('course_students')
+        $enrolledCourseIds = DB::table('course_students')
             ->where('user_id', $studentId)
             ->pluck('course_id');
 
@@ -31,7 +32,7 @@ class StudentQuizController extends Controller
 
         $quizzes = $q->paginate(20)->withQueryString();
 
-        $courses = \App\Models\Course::whereIn('id', $enrolledCourseIds)
+        $courses = Course::whereIn('id', $enrolledCourseIds)
             ->orderByDesc('id')->get(['id', 'title']);
 
         // attempts map (for status)
@@ -46,7 +47,7 @@ class StudentQuizController extends Controller
     {
         $studentId = auth()->id();
 
-        $isEnrolled = \DB::table('course_students')
+        $isEnrolled = DB::table('course_students')
             ->where('user_id', $studentId)
             ->where('course_id', $quiz->course_id)
             ->exists();
@@ -71,7 +72,7 @@ class StudentQuizController extends Controller
     {
         $studentId = auth()->id();
 
-        $isEnrolled = \DB::table('course_students')
+        $isEnrolled = DB::table('course_students')
             ->where('user_id', $studentId)
             ->where('course_id', $quiz->course_id)
             ->exists();
@@ -223,7 +224,7 @@ class StudentQuizController extends Controller
         $studentId = auth()->id();
 
         // ✅ ensure enrolled
-        $isEnrolled = \DB::table('course_students')
+        $isEnrolled = DB::table('course_students')
             ->where('user_id', $studentId)
             ->where('course_id', $quiz->course_id)
             ->exists();

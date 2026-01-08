@@ -1,7 +1,5 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
@@ -11,9 +9,10 @@ use App\Http\Controllers\Admin\QuizAttemptController;
 use App\Http\Controllers\Admin\AiAssistantController;
 use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Controllers\Student\StudentQuizController;
-
-
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\AuthController;
+
 
 // ---------------- AUTH ----------------
 Route::get('/', fn() => redirect()->route('login'));
@@ -107,6 +106,20 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/feedback/{feedback}', [FeedbackController::class, 'adminShow'])->name('feedback.show');
         Route::patch('/feedback/{feedback}/status', [FeedbackController::class, 'updateStatus'])->name('feedback.status');
         Route::post('/feedback/{feedback}/status', [FeedbackController::class, 'updateStatus'])->name('feedback.status.post');
+
+        // default = quiz report
+        Route::get('/reports', [ReportController::class, 'index'])
+            ->name('reports.index');
+
+        // specific report types
+        Route::get('/reports/{type}', [ReportController::class, 'index'])
+            ->whereIn('type', ['quiz', 'courses', 'trainers', 'students', 'users'])
+            ->name('reports.type');
+
+        // PDF export
+        Route::get('/reports/{type}/export/pdf', [ReportController::class, 'exportPdf'])
+            ->whereIn('type', ['quiz', 'courses', 'trainers', 'students', 'users'])
+            ->name('reports.export.pdf');
     });
 
 // ---------------- TRAINER ----------------
@@ -166,6 +179,13 @@ Route::middleware(['auth', 'role:trainer'])
         // AI Assistant
         Route::get('/ai-assistant', [AiAssistantController::class, 'index'])->name('ai.index');
         Route::post('/ai-assistant/send', [AiAssistantController::class, 'send'])->name('ai.send');
+
+        Route::get('/reports', [ReportController::class, 'trainer'])
+            ->name('reports.index');
+
+        Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])
+            ->name('reports.export.pdf');
+
     });
 
 // ---------------- STUDENT ----------------
