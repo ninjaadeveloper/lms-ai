@@ -229,48 +229,48 @@ class ReportController extends Controller
     private function studentReport(Request $request)
     {
         $status = $request->status;
-    
+
         $query = User::where('role', 'student')
             ->when(
                 $status !== null && $status !== '',
-                fn ($q) => $q->where('status', $status)
+                fn($q) => $q->where('status', $status)
             )
             ->select('users.*')
             ->selectSub(
                 function ($q) {
                     $q->from('course_students')
-                      ->selectRaw('COUNT(*)')
-                      ->whereColumn('course_students.user_id', 'users.id');
+                        ->selectRaw('COUNT(*)')
+                        ->whereColumn('course_students.user_id', 'users.id');
                 },
                 'courses'
             )
             ->selectSub(
                 function ($q) {
                     $q->from('quiz_attempts')
-                      ->selectRaw('COUNT(*)')
-                      ->whereColumn('quiz_attempts.student_id', 'users.id');
+                        ->selectRaw('COUNT(*)')
+                        ->whereColumn('quiz_attempts.student_id', 'users.id');
                 },
                 'attempts'
             );
-    
+
         $reports = $query
             ->orderBy('name')
             ->get()
-            ->map(fn ($s) => (object) [
-                'name'     => $s->name,
-                'email'    => $s->email,
-                'courses'  => $s->courses,   // ✅ FIXED
+            ->map(fn($s) => (object) [
+                'name' => $s->name,
+                'email' => $s->email,
+                'courses' => $s->courses,   // ✅ FIXED
                 'attempts' => $s->attempts,
-                'status'   => $s->status,
+                'status' => $s->status,
             ]);
-    
+
         // ===== TOP CARDS =====
         $stats = [
-            'total'    => User::where('role', 'student')->count(),
-            'active'   => User::where('role', 'student')->where('status', 1)->count(),
+            'total' => User::where('role', 'student')->count(),
+            'active' => User::where('role', 'student')->where('status', 1)->count(),
             'inactive' => User::where('role', 'student')->where('status', 0)->count(),
         ];
-    
+
         // ===== AJAX =====
         if ($request->ajax()) {
             return response()->json([
@@ -278,10 +278,10 @@ class ReportController extends Controller
                 'stats' => $stats,
             ]);
         }
-    
+
         return view('admin.reports.students', compact('reports', 'stats'));
     }
-    
+
 
 
 
@@ -355,22 +355,57 @@ class ReportController extends Controller
         }
 
         /* ================= COURSES PDF ================= */
+        /* ================= COURSES PDF ================= */
         if ($type === 'courses') {
 
-            $reports = Course::with('trainer:id,name')
+            $status = $request->status;
+            $trainerId = $request->trainer;
+            $from = $request->from;
+            $to = $request->to;
+
+            $reports = Course::with(['trainer:id,name'])
+                ->when(
+                    $status !== null && $status !== '',
+                    fn($q) => $q->where('status', $status)
+                )
+                ->when(
+                    $trainerId,
+                    fn($q) => $q->where('trainer_id', $trainerId)
+                )
                 ->withCount('quizzes')
+
+                // ✅ ENROLLED STUDENTS (same logic as courseReport)
+                ->withCount([
+                    'students as students' => function ($q) use ($from, $to) {
+                        $q->when(
+                            $from,
+                            fn($qq) =>
+                            $qq->whereDate('course_students.created_at', '>=', $from)
+                        )->when(
+                                $to,
+                                fn($qq) =>
+                                $qq->whereDate('course_students.created_at', '<=', $to)
+                            );
+                    }
+                ])
+
                 ->get()
                 ->map(fn($c) => (object) [
                     'title' => $c->title,
                     'trainer' => $c->trainer->name ?? '-',
                     'quizzes' => $c->quizzes_count,
+                    'students' => $c->students,              // ✅ NOW EXISTS
                     'status' => $c->status ? 'Active' : 'Inactive',
                 ]);
 
+            // TOP CARDS (same as UI)
             $stats = [
                 'total' => Course::count(),
                 'active' => Course::where('status', 1)->count(),
                 'inactive' => Course::where('status', 0)->count(),
+                'students' => \DB::table('course_students')
+                    ->distinct('user_id')
+                    ->count('user_id'),
             ];
 
             return Pdf::loadView(
@@ -378,6 +413,7 @@ class ReportController extends Controller
                 compact('reports', 'stats')
             )->download('courses-report.pdf');
         }
+
 
         /* ================= TRAINERS PDF ================= */
         if ($type === 'trainers') {
@@ -427,32 +463,27 @@ class ReportController extends Controller
 
             $status = $request->status;
 
-            $students = User::where('role', 'student')
-                ->when(
-                    $status !== null && $status !== '',
-                    fn($q) => $q->where('status', $status)
-                )
-                ->orderBy('name')
-                ->get();
-
-            $reports = $students->map(function ($s) {
-
-                $courses = \DB::table('course_students')
-                    ->where('user_id', $s->id)
-                    ->count();
-
-                $attempts = \DB::table('quiz_attempts')
-                    ->where('student_id', $s->id)
-                    ->count();
-
-                return (object) [
+            $reports = User::where('role', 'student')
+                ->when($status !== null && $status !== '', fn($q) => $q->where('status', $status))
+                ->select('users.*')
+                ->selectSub(function ($q) {
+                    $q->from('course_students')
+                        ->selectRaw('COUNT(*)')
+                        ->whereColumn('course_students.user_id', 'users.id');
+                }, 'courses')
+                ->selectSub(function ($q) {
+                    $q->from('quiz_attempts')
+                        ->selectRaw('COUNT(*)')
+                        ->whereColumn('quiz_attempts.student_id', 'users.id');
+                }, 'attempts')
+                ->get()
+                ->map(fn($s) => (object) [
                     'name' => $s->name,
                     'email' => $s->email,
-                    'courses' => $courses,
-                    'attempts' => $attempts,
-                    'status' => (int) $s->status,
-                ];
-            });
+                    'courses' => $s->courses,
+                    'attempts' => $s->attempts,
+                    'status' => $s->status,
+                ]);
 
             $stats = [
                 'total' => User::where('role', 'student')->count(),
