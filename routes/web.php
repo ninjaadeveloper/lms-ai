@@ -10,7 +10,8 @@ use App\Http\Controllers\Admin\AiAssistantController;
 use App\Http\Controllers\Admin\FeedbackController;
 use App\Http\Controllers\Student\StudentQuizController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Trainer\ReportController as TrainerReportController;
 use App\Http\Controllers\AuthController;
 
 
@@ -108,16 +109,16 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/feedback/{feedback}/status', [FeedbackController::class, 'updateStatus'])->name('feedback.status.post');
 
         // default = quiz report
-        Route::get('/reports', [ReportController::class, 'index'])
+        Route::get('/reports', [AdminReportController::class, 'index'])
             ->name('reports.index');
 
         // specific report types
-        Route::get('/reports/{type}', [ReportController::class, 'index'])
+        Route::get('/reports/{type}', [AdminReportController::class, 'index'])
             ->whereIn('type', ['quiz', 'courses', 'trainers', 'students', 'users'])
             ->name('reports.type');
 
         // PDF export
-        Route::get('/reports/{type}/export/pdf', [ReportController::class, 'exportPdf'])
+        Route::get('/reports/{type}/export/pdf', [AdminReportController::class, 'exportPdf'])
             ->whereIn('type', ['quiz', 'courses', 'trainers', 'students', 'users'])
             ->name('reports.export.pdf');
     });
@@ -180,10 +181,14 @@ Route::middleware(['auth', 'role:trainer'])
         Route::get('/ai-assistant', [AiAssistantController::class, 'index'])->name('ai.index');
         Route::post('/ai-assistant/send', [AiAssistantController::class, 'send'])->name('ai.send');
 
-        Route::get('/reports', [ReportController::class, 'trainer'])
-            ->name('reports.index');
+        Route::get('/reports', [TrainerReportController::class, 'index'])
+            ->name('reports');
 
-        Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])
+        Route::get('/reports/{type}', [TrainerReportController::class, 'index'])
+            ->whereIn('type', ['courses', 'students', 'quizzes'])
+            ->name('reports.type');
+
+        Route::get('/reports/{type}/export/pdf', [TrainerReportController::class, 'exportPdf'])
             ->name('reports.export.pdf');
 
     });

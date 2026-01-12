@@ -353,8 +353,6 @@ class ReportController extends Controller
                 compact('reports', 'stats', 'courseId', 'from', 'to')
             )->download('quiz-report.pdf');
         }
-
-        /* ================= COURSES PDF ================= */
         /* ================= COURSES PDF ================= */
         if ($type === 'courses') {
 
@@ -500,9 +498,6 @@ class ReportController extends Controller
 
         abort(404);
     }
-
-
-
 
 
 }

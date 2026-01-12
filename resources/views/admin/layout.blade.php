@@ -254,77 +254,76 @@
               </li>
 
               {{-- REPORTS --}}
-@if($role === 'admin')
-<li class="dropdown {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
-  <a href="#" class="menu-toggle nav-link has-dropdown">
-    <i data-feather="bar-chart-2"></i>
-    <span>Reports</span>
-  </a>
+              @if(auth()->user()->role === 'admin')
+                <li class="dropdown {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                  <a href="#" class="menu-toggle nav-link has-dropdown">
+                    <i data-feather="bar-chart-2"></i>
+                    <span>Reports</span>
+                  </a>
 
-  <ul class="dropdown-menu">
+                  <ul class="dropdown-menu">
+                    <li>
+                      <a class="nav-link" href="{{ route('admin.reports.index') }}">
+                        Quiz Reports
+                      </a>
+                    </li>
+
+                    <li>
+                      <a class="nav-link" href="{{ route('admin.reports.type', 'courses') }}">
+                        Courses Reports
+                      </a>
+                    </li>
+
+                    <li>
+                      <a class="nav-link" href="{{ route('admin.reports.type', 'trainers') }}">
+                        Trainers Reports
+                      </a>
+                    </li>
+
+                    <li>
+                      <a class="nav-link" href="{{ route('admin.reports.type', 'students') }}">
+                        Students Reports
+                      </a>
+                    </li>
+
+                    <!-- <li>
+                      <a class="nav-link" href="{{ route('admin.reports.type', 'users') }}">
+                        Users Reports
+                      </a>
+                    </li> -->
+                  </ul>
+                </li>
+
+
+
+              @elseif(auth()->user()->role === 'trainer')
+                <li class="dropdown {{ request()->routeIs('trainer.reports.*') ? 'active' : '' }}">
+                  <a href="#" class="menu-toggle nav-link has-dropdown">
+                    <i data-feather="bar-chart-2"></i><span>Reports</span>
+                  </a>
+                  <ul class="dropdown-menu">
     <li>
-      <a class="nav-link" href="{{ route('admin.reports.index') }}">
-        Quiz Reports
-      </a>
+        <a class="nav-link" href="{{ route('trainer.reports') }}">Dashboard</a>
     </li>
-
     <li>
-      <a class="nav-link" href="{{ route('admin.reports.type', 'courses') }}">
-        Courses Reports
-      </a>
+        <a class="nav-link" href="{{ route('trainer.reports.type','courses') }}">
+            My Courses Report
+        </a>
     </li>
-
     <li>
-      <a class="nav-link" href="{{ route('admin.reports.type', 'trainers') }}">
-        Trainers Reports
-      </a>
+        <a class="nav-link" href="{{ route('trainer.reports.type','students') }}">
+            Students Report
+        </a>
     </li>
-
     <li>
-      <a class="nav-link" href="{{ route('admin.reports.type', 'students') }}">
-        Students Reports
-      </a>
+        <a class="nav-link" href="{{ route('trainer.reports.type','quizzes') }}">
+            Quizzes Report
+        </a>
     </li>
+</ul>
 
-    <!-- <li>
-      <a class="nav-link" href="{{ route('admin.reports.type', 'users') }}">
-        Users Reports
-      </a>
-    </li> -->
-  </ul>
-</li>
-
-
-
-@elseif($role === 'trainer')
-  <li class="dropdown {{ request()->routeIs('trainer.reports.*') ? 'active' : '' }}">
-    <a href="#" class="menu-toggle nav-link has-dropdown">
-      <i data-feather="bar-chart-2"></i><span>Reports</span>
-    </a>
-    <ul class="dropdown-menu">
-      <li>
-        <a class="nav-link" href="{{ route('trainer.reports') }}">
-          Dashboard
-        </a>
-      </li>
-      <li>
-        <a class="nav-link" href="{{ route('trainer.reports', ['type' => 'courses']) }}">
-          My Courses Report
-        </a>
-      </li>
-      <li>
-        <a class="nav-link" href="{{ route('trainer.reports', ['type' => 'students']) }}">
-          Students Report
-        </a>
-      </li>
-      <li>
-        <a class="nav-link" href="{{ route('trainer.reports', ['type' => 'quizzes']) }}">
-          Quizzes Report
-        </a>
-      </li>
-    </ul>
-  </li>
-@endif
+                </li>
+              @endif
 
 
 

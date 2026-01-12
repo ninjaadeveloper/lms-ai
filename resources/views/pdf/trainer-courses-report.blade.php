@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>My Courses Report</title>
+    <style>
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #333;
+            padding: 6px;
+            text-align: left;
+        }
+
+        th {
+            background: #f0f0f0;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>My Courses Report</h2>
+
+    <table width="100%" style="margin-bottom:20px;">
+        <tr>
+            <td><b>Total:</b> {{ $stats['total'] }}</td>
+            <td><b>Active:</b> {{ $stats['active'] }}</td>
+            <td><b>Inactive:</b> {{ $stats['inactive'] }}</td>
+        </tr>
+    </table>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Course</th>
+                <th>Quizzes</th>
+                <th>Students</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($reports as $i => $row)
+                <tr>
+                    <td>{{ $i + 1 }}</td>
+                    <td>{{ $row->title }}</td>
+                    <td class="text-center">{{ $row->quizzes }}</td>
+                    <td class="text-center">{{ $row->students }}</td>
+                    <td>{{ $row->status ? 'Active' : 'Inactive' }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+</body>
+
+</html>
