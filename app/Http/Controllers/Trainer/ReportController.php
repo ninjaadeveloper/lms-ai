@@ -37,7 +37,7 @@ class ReportController extends Controller
     {
         $trainerId = auth()->id();
 
-        $status = $request->status;   // "0" or "1" or null
+        $status = $request->status;
         $from = $request->from;
         $to = $request->to;
 
@@ -175,9 +175,21 @@ class ReportController extends Controller
         $from = $request->from;
         $to = $request->to;
 
-        /* ======================
-           BASE QUIZ QUERY
-        ====================== */
+        /* ============================
+           ATTEMPT FILTER (ONE SOURCE)
+        ============================ */
+        $attemptFilter = function ($q) use ($from, $to) {
+            if ($from) {
+                $q->whereDate('submitted_at', '>=', $from);
+            }
+            if ($to) {
+                $q->whereDate('submitted_at', '<=', $to);
+            }
+        };
+
+        /* ============================
+           QUIZ QUERY
+        ============================ */
         $query = Quiz::whereHas(
             'course',
             fn($q) =>
@@ -188,61 +200,45 @@ class ReportController extends Controller
             $query->where('course_id', $course);
         }
 
-        /* ======================
-           LOAD COUNTS
-        ====================== */
         $query->with('course:id,title')
             ->withCount([
-                'attempts as attempts',
-                'attempts as passed' => fn($q) => $q->where('score_percent', '>=', 50),
-                'attempts as failed' => fn($q) => $q->where('score_percent', '<', 50),
-            ])
-            ->when(
-                $from,
-                fn($q) =>
-                $q->whereHas(
-                    'attempts',
-                    fn($qq) =>
-                    $qq->whereDate('submitted_at', '>=', $from)
-                )
-            )
-            ->when(
-                $to,
-                fn($q) =>
-                $q->whereHas(
-                    'attempts',
-                    fn($qq) =>
-                    $qq->whereDate('submitted_at', '<=', $to)
-                )
-            );
+                'attempts as attempts' => $attemptFilter,
+                'attempts as passed' => fn($q) => $q->where('score_percent', '>=', 50)->where($attemptFilter),
+                'attempts as failed' => fn($q) => $q->where('score_percent', '<', 50)->where($attemptFilter),
+            ]);
 
         $quizzes = $query->get();
 
-        /* ======================
+        /* ============================
            TABLE DATA
-        ====================== */
-        $reports = $quizzes->map(function ($q) {
+        ============================ */
+        $reports = $quizzes->map(function ($q) use ($from, $to) {
 
-            $attempts = $q->attempts;
-            $passed = $q->passed;
-            $failed = $q->failed;
+            $avgQuery = QuizAttempt::where('quiz_id', $q->id);
 
-            $avg = QuizAttempt::where('quiz_id', $q->id)->avg('score_percent') ?? 0;
+            if ($from)
+                $avgQuery->whereDate('submitted_at', '>=', $from);
+            if ($to)
+                $avgQuery->whereDate('submitted_at', '<=', $to);
 
-            $passPercent = $attempts > 0 ? round(($passed / $attempts) * 100, 1) : 0;
+            $avg = $avgQuery->avg('score_percent') ?? 0;
+
+            $passPercent = $q->attempts > 0
+                ? round(($q->passed / $q->attempts) * 100, 1)
+                : 0;
 
             return (object) [
                 'title' => $q->topic ?? 'Quiz #' . $q->id,
                 'course' => $q->course->title ?? '-',
-                'attempts' => $attempts,
+                'attempts' => $q->attempts,
                 'avg_score' => round($avg, 1),
                 'pass_percent' => $passPercent
             ];
         });
 
-        /* ======================
-           STATS (FILTER AWARE)
-        ====================== */
+        /* ============================
+           STATS (FILTERED)
+        ============================ */
         $statsBase = QuizAttempt::whereHas(
             'quiz.course',
             fn($q) =>
@@ -253,13 +249,10 @@ class ReportController extends Controller
             $statsBase->whereHas('quiz', fn($q) => $q->where('course_id', $course));
         }
 
-        if ($from) {
+        if ($from)
             $statsBase->whereDate('submitted_at', '>=', $from);
-        }
-
-        if ($to) {
+        if ($to)
             $statsBase->whereDate('submitted_at', '<=', $to);
-        }
 
         $attempts = (clone $statsBase)->count();
         $passed = (clone $statsBase)->where('score_percent', '>=', 50)->count();
@@ -267,20 +260,13 @@ class ReportController extends Controller
 
         $stats = [
             'attempts' => $attempts,
-            'pass_percent' => $attempts > 0 ? round(($passed / $attempts) * 100, 1) : 0,
-            'fail_percent' => $attempts > 0 ? round(($failed / $attempts) * 100, 1) : 0,
+            'pass_percent' => $attempts ? round(($passed / $attempts) * 100, 1) : 0,
+            'fail_percent' => $attempts ? round(($failed / $attempts) * 100, 1) : 0,
         ];
 
-        /* ======================
-           COURSES DROPDOWN
-        ====================== */
         $courses = Course::where('trainer_id', $trainerId)
-            ->orderBy('title')
-            ->get(['id', 'title']);
+            ->orderBy('title')->get(['id', 'title']);
 
-        /* ======================
-           AJAX
-        ====================== */
         if ($request->ajax()) {
             return response()->json([
                 'table' => view('trainer.reports.partials.quizzes-table', compact('reports'))->render(),
@@ -293,64 +279,13 @@ class ReportController extends Controller
 
 
 
+
     /* =========================
        PDF EXPORT
     ========================== */
     public function exportPdf(Request $request, $type)
     {
         $trainerId = auth()->id();
-
-        if ($type === 'students') {
-
-            $status = $request->has('status') && $request->status !== ''
-                ? (int) $request->status
-                : null;
-
-            $from = $request->from;
-            $to = $request->to;
-
-            /* STUDENTS QUERY (Admin jaisa) */
-            $query = User::where('role', 'student')
-                ->whereHas('courses', fn($q) => $q->where('trainer_id', $trainerId))
-                ->when(!is_null($status), fn($q) => $q->where('status', $status))
-                ->withCount([
-                    'courses as courses' => function ($q) use ($trainerId, $from, $to) {
-                        $q->where('trainer_id', $trainerId)
-                            ->when($from, fn($qq) => $qq->whereDate('course_user.created_at', '>=', $from))
-                            ->when($to, fn($qq) => $qq->whereDate('course_user.created_at', '<=', $to));
-                    }
-                ])
-                ->withCount([
-                    'quizAttempts as quizzes'
-                ]);
-
-            $reports = $query->get()->map(fn($s) => (object) [
-                'name' => $s->name,
-                'email' => $s->email,
-                'courses' => $s->courses,
-                'quizzes' => $s->quizzes,
-                'status' => $s->status ? 'Active' : 'Inactive'
-            ]);
-
-            /* TOP CARDS */
-            $statsBase = User::where('role', 'student')
-                ->whereHas('courses', fn($q) => $q->where('trainer_id', $trainerId));
-
-            if (!is_null($status)) {
-                $statsBase->where('status', $status);
-            }
-
-            $stats = [
-                'total' => $statsBase->count(),
-                'active' => User::where('role', 'student')->where('status', 1)
-                    ->whereHas('courses', fn($q) => $q->where('trainer_id', $trainerId))->count(),
-                'inactive' => User::where('role', 'student')->where('status', 0)
-                    ->whereHas('courses', fn($q) => $q->where('trainer_id', $trainerId))->count(),
-            ];
-
-            return PDF::loadView('pdf.trainer-students-report', compact('reports', 'stats'))
-                ->download('my-students-report.pdf');
-        }
 
         if ($type === 'courses') {
 
@@ -368,7 +303,7 @@ class ReportController extends Controller
                     'title' => $c->title,
                     'quizzes' => $c->quizzes_count,
                     'students' => $c->students,
-                    'status' => $c->status ? 'Active' : 'Inactive',
+                    'status' => $c->status
                 ]);
 
             $stats = [
@@ -380,6 +315,61 @@ class ReportController extends Controller
             return PDF::loadView('pdf.trainer-courses-report', compact('reports', 'stats'))
                 ->download('my-courses-report.pdf');
         }
+
+        if ($type === 'students') {
+
+            $trainerId = auth()->id();
+
+            $status = ($request->status !== null && $request->status !== '')
+                ? (int) $request->status
+                : null;
+
+            $from = $request->from;
+            $to = $request->to;
+
+            /* ======================
+               SAME QUERY AS DASHBOARD
+            ====================== */
+            $query = User::where('role', 'student')
+                ->whereHas('courses', fn($q) => $q->where('trainer_id', $trainerId))
+                ->when(!is_null($status), fn($q) => $q->where('status', $status))
+                ->withCount([
+                    'courses as courses' => function ($q) use ($trainerId, $from, $to) {
+                        $q->where('trainer_id', $trainerId)
+                            ->when($from, fn($qq) => $qq->whereDate('course_user.created_at', '>=', $from))
+                            ->when($to, fn($qq) => $qq->whereDate('course_user.created_at', '<=', $to));
+                    }
+                ])
+                ->withCount('quizAttempts');
+
+            $reports = $query->get()->map(fn($s) => (object) [
+                'name' => $s->name,
+                'email' => $s->email,
+                'courses' => $s->courses,
+                'quizzes' => $s->quiz_attempts_count,
+                'status' => $s->status
+            ]);
+
+            /* ======================
+               FILTERED STATS
+            ====================== */
+            $statsBase = User::where('role', 'student')
+                ->whereHas('courses', fn($q) => $q->where('trainer_id', $trainerId));
+
+            if (!is_null($status)) {
+                $statsBase->where('status', $status);
+            }
+
+            $stats = [
+                'total' => (clone $statsBase)->count(),
+                'active' => (clone $statsBase)->where('status', 1)->count(),
+                'inactive' => (clone $statsBase)->where('status', 0)->count(),
+            ];
+
+            return PDF::loadView('pdf.trainer-students-report', compact('reports', 'stats'))
+                ->download('my-students-report.pdf');
+        }
+
 
         if ($type === 'quizzes') {
 

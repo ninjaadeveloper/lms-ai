@@ -26,59 +26,63 @@
                         </div>
 
                         <div class="col-md-3">
-                            <button class="btn btn-primary">
-                                <i class="fas fa-filter"></i> Apply
-                            </button>
-                        </div>
+    <button type="submit" class="btn btn-primary">
+        <i class="fas fa-filter"></i> Apply
+    </button>
+
+    <button type="button" id="clearBtn" class="btn btn-light">
+         Clear
+    </button>
+</div>
 
                     </form>
                 </div>
             </div>
 
-           {{-- STATS CARDS --}}
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card card-statistic-1">
-            <div class="card-icon bg-primary">
-                <i class="fas fa-users"></i>
-            </div>
-            <div class="card-wrap">
-                <div class="card-header">
-                    <h4>Total Students</h4>
+            {{-- STATS CARDS --}}
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card card-statistic-1">
+                        <div class="card-icon bg-primary">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="card-wrap">
+                            <div class="card-header">
+                                <h4>Total Students</h4>
+                            </div>
+                            <div class="card-body" id="stat-total">{{ $stats['total'] }}</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body" id="stat-total">{{ $stats['total'] }}</div>
-            </div>
-        </div>
-    </div>
 
-    <div class="col-md-4">
-        <div class="card card-statistic-1">
-            <div class="card-icon bg-success">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <div class="card-wrap">
-                <div class="card-header">
-                    <h4>Active</h4>
+                <div class="col-md-4">
+                    <div class="card card-statistic-1">
+                        <div class="card-icon bg-success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="card-wrap">
+                            <div class="card-header">
+                                <h4>Active</h4>
+                            </div>
+                            <div class="card-body" id="stat-active">{{ $stats['active'] }}</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body" id="stat-active">{{ $stats['active'] }}</div>
-            </div>
-        </div>
-    </div>
 
-    <div class="col-md-4">
-        <div class="card card-statistic-1">
-            <div class="card-icon bg-danger">
-                <i class="fas fa-times-circle"></i>
-            </div>
-            <div class="card-wrap">
-                <div class="card-header">
-                    <h4>Inactive</h4>
+                <div class="col-md-4">
+                    <div class="card card-statistic-1">
+                        <div class="card-icon bg-danger">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="card-wrap">
+                            <div class="card-header">
+                                <h4>Inactive</h4>
+                            </div>
+                            <div class="card-body" id="stat-inactive">{{ $stats['inactive'] }}</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body" id="stat-inactive">{{ $stats['inactive'] }}</div>
             </div>
-        </div>
-    </div>
-</div>
 
 
             {{-- TABLE --}}
@@ -86,11 +90,10 @@
                 <div class="card-header d-flex justify-content-between">
                     <h4>Students Overview</h4>
 
-                    <a id="exportBtn"
-   href="{{ route('trainer.reports.export.pdf', ['type'=>'students']) }}"
-   class="btn btn-danger btn-sm">
-    <i class="fas fa-file-pdf"></i> Export PDF
-</a>
+                    <a id="exportBtn" href="{{ route('trainer.reports.export.pdf', ['type' => 'students']) }}"
+                        class="btn btn-danger btn-sm">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </a>
                 </div>
 
                 <div class="card-body p-0">
@@ -116,30 +119,44 @@
 @endsection
 
 @push('scripts')
-<script>
-document.getElementById('filtersForm').addEventListener('submit', function(e){
-    e.preventDefault();
+    <script>
+        const form = document.getElementById('filtersForm');
+const table = document.getElementById('reportTable');
+const total = document.getElementById('stat-total');
+const active = document.getElementById('stat-active');
+const inactive = document.getElementById('stat-inactive');
+const pdfBtn = document.getElementById('exportBtn');
 
-    const params = new URLSearchParams(new FormData(this)).toString();
-
-    // update table
-    fetch("{{ route('trainer.reports',['type'=>'students']) }}?"+params,{
-        headers:{
-            "X-Requested-With":"XMLHttpRequest",
-            "Accept":"application/json"
+function loadData(params = "") {
+    fetch("{{ url('/trainer/reports/students') }}?" + params, {
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "Accept": "application/json"
         }
     })
-    .then(r=>r.json())
-    .then(res=>{
-        document.getElementById('reportTable').innerHTML = res.table;
-        document.getElementById('stat-total').innerText = res.stats.total;
-        document.getElementById('stat-active').innerText = res.stats.active;
-        document.getElementById('stat-inactive').innerText = res.stats.inactive;
-    });
+    .then(r => r.json())
+    .then(res => {
+        table.innerHTML = res.table;
+        total.innerText = res.stats.total;
+        active.innerText = res.stats.active;
+        inactive.innerText = res.stats.inactive;
 
-    // update PDF link
-    document.getElementById('exportBtn').href =
-        "{{ route('trainer.reports.export.pdf',['type'=>'students']) }}?"+params;
+        // update PDF link
+        pdfBtn.href = "{{ url('/trainer/reports/students/export/pdf') }}?" + params;
+    });
+}
+
+// APPLY
+form.addEventListener('submit', function(e){
+    e.preventDefault();
+    const params = new URLSearchParams(new FormData(this)).toString();
+    loadData(params);
 });
-</script>
+
+// CLEAR
+document.getElementById('clearBtn').addEventListener('click', function () {
+    form.reset();            // dropdown back to All
+    loadData("");            // reload unfiltered data
+});
+    </script>
 @endpush

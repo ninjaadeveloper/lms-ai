@@ -42,7 +42,7 @@
                                 <i class="fas fa-filter"></i> Apply
                             </button>
                             <button type="button" id="resetBtn" class="btn btn-light">
-                                Reset
+                                Clear
                             </button>
                         </div>
 
@@ -94,12 +94,10 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">Quiz Performance Report</h4>
 
-                    <a id="exportBtn"
-   href="{{ route('trainer.reports.export.pdf', ['type' => 'quizzes']) }}"
-   target="_blank"
-   class="btn btn-danger btn-sm">
-    <i class="fas fa-file-pdf"></i> Export PDF
-</a>
+                    <a id="exportBtn" href="{{ route('trainer.reports.export.pdf', ['type' => 'quizzes']) }}"
+                        target="_blank" class="btn btn-danger btn-sm">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </a>
 
                 </div>
 
@@ -117,7 +115,7 @@
                                 </tr>
                             </thead>
                             <tbody id="reportTable">
-                            @include('trainer.reports.partials.quizzes-table', ['reports' => $reports])
+                                @include('trainer.reports.partials.quizzes-table', ['reports' => $reports])
                             </tbody>
                         </table>
                     </div>
@@ -128,27 +126,37 @@
     </div>
 @endsection
 @push('scripts')
-<script>
-   document.getElementById('filtersForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+    <script>
+        const form = document.getElementById('filtersForm');
+        const resetBtn = document.getElementById('resetBtn');
+        const table = document.getElementById('reportTable');
 
-    const params = new URLSearchParams(new FormData(this)).toString();
+        function loadQuizzes(params = "") {
+            fetch("{{ route('trainer.reports.type', 'quizzes') }}?" + params, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(r => r.json())
+                .then(res => {
+                    table.innerHTML = res.table;
+                    document.getElementById('stat-attempts').innerText = res.stats.attempts;
+                    document.getElementById('stat-pass').innerText = res.stats.pass_percent + "%";
+                    document.getElementById('stat-fail').innerText = res.stats.fail_percent + "%";
 
-    fetch("{{ route('trainer.reports.type','quizzes') }}?" + params, {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    })
-    .then(r => r.json())
-    .then(res => {
-        document.getElementById('reportTable').innerHTML = res.table;
-        document.getElementById('stat-attempts').innerText = res.stats.attempts;
-        document.getElementById('stat-pass').innerText = res.stats.pass_percent + "%";
-        document.getElementById('stat-fail').innerText = res.stats.fail_percent + "%";
+                    document.getElementById('exportBtn').href =
+                        "{{ route('trainer.reports.export.pdf', ['type' => 'quizzes']) }}?" + params;
+                });
+        }
 
-        document.getElementById('exportBtn').href =
-            "{{ route('trainer.reports.export.pdf', ['type'=>'quizzes']) }}?" + params;
-    });
+        form.addEventListener('submit', function (e) {
+            e.preventDefault(); // 
 
+            const params = new URLSearchParams(new FormData(this)).toString();
+            loadQuizzes(params);
+        });
 
-});
-</script>
+        resetBtn.addEventListener('click', function () {
+            form.reset();
+            loadQuizzes("");
+        });
+    </script>
 @endpush

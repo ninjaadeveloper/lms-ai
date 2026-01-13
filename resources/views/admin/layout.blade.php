@@ -303,11 +303,8 @@
                   </a>
                   <ul class="dropdown-menu">
     <li>
-        <a class="nav-link" href="{{ route('trainer.reports') }}">Dashboard</a>
-    </li>
-    <li>
         <a class="nav-link" href="{{ route('trainer.reports.type','courses') }}">
-            My Courses Report
+            Courses Report
         </a>
     </li>
     <li>
