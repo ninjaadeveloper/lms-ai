@@ -7,9 +7,9 @@ use App\Models\Feedback;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
-
 use App\Models\User;
 use App\Models\Course;
+
 
 class DashboardController extends Controller
 {
@@ -35,6 +35,12 @@ class DashboardController extends Controller
         $data['totalCourses'] = Course::count();
         $data['recentUsers'] = User::latest()->limit(8)->get();
         $data['recentCourses'] = Course::latest()->limit(8)->get();
+        $data['activeUsers'] = User::where('status', 1)->count();
+        $data['inactiveUsers'] = User::where('status', 0)->count();
+
+        $rolesWeek = $this->usersByRoleLast7Days();
+
+        $data['usersByRoleWeek'] = $rolesWeek;
 
         $data['role'] = 'admin';
         return view('admin.index', $data);
@@ -151,28 +157,30 @@ class DashboardController extends Controller
         string $dateColumn = 'created_at'
     ) {
         $series = array_fill(0, 7, 0);
-    
-        if (!Schema::hasTable($table) || !Schema::hasColumn($table, $dateColumn)) return $series;
-        if (empty($inValues)) return $series;
-    
+
+        if (!Schema::hasTable($table) || !Schema::hasColumn($table, $dateColumn))
+            return $series;
+        if (empty($inValues))
+            return $series;
+
         $start = Carbon::now()->subDays(6)->startOfDay();
-    
+
         $q = DB::table($table)->whereIn($inColumn, $inValues);
-    
+
         foreach ($where as $k => $v) {
             $q->where($k, $v);
         }
-    
+
         $rows = $q->where($dateColumn, '>=', $start)
             ->selectRaw("DATE($dateColumn) d, COUNT(*) c")
             ->groupBy('d')
             ->pluck('c', 'd');
-    
+
         for ($i = 6; $i >= 0; $i--) {
             $day = Carbon::now()->subDays($i)->toDateString();
             $series[6 - $i] = (int) ($rows[$day] ?? 0);
         }
-    
+
         return $series;
     }
 
@@ -184,21 +192,50 @@ class DashboardController extends Controller
             $labels[] = Carbon::now()->subDays($i)->format('D');
         }
 
+        // ---- Active vs Inactive users last 7 days ----
+        $activeUsers = array_fill(0, 7, 0);
+        $inactiveUsers = array_fill(0, 7, 0);
+
+        if (Schema::hasColumn('users', 'status') && Schema::hasColumn('users', 'created_at')) {
+
+            $start = Carbon::now()->subDays(6)->startOfDay();
+
+            $rows = DB::table('users')
+                ->where('created_at', '>=', $start)
+                ->selectRaw("DATE(created_at) as d, status, COUNT(*) as c")
+                ->groupBy('d', 'status')
+                ->get();
+
+            foreach ($rows as $r) {
+                for ($i = 6; $i >= 0; $i--) {
+                    $day = Carbon::now()->subDays($i)->toDateString();
+                    if ($r->d == $day) {
+                        if ((int) $r->status === 1) {
+                            $activeUsers[6 - $i] = $r->c;
+                        } else {
+                            $inactiveUsers[6 - $i] = $r->c;
+                        }
+                    }
+                }
+            }
+        }
+
+        $roleWeekSeries = [
+            'admin' => $this->last7DaysSeries('users', ['role' => 'admin']),
+            'trainer' => $this->last7DaysSeries('users', ['role' => 'trainer']),
+            'student' => $this->last7DaysSeries('users', ['role' => 'student']),
+        ];
+
         return [
             'labels' => $labels,
-
-            // admin charts defaults (safe)
+            'usersByRoleWeek' => $roleWeekSeries,
+            // already existing
             'usersSeries' => $this->last7DaysSeries('users'),
             'coursesSeries' => $this->last7DaysSeries('courses'),
 
-            'rolePie' => [
-                'labels' => ['Admin', 'Trainer', 'Student'],
-                'series' => [
-                    User::where('role', 'admin')->count(),
-                    User::where('role', 'trainer')->count(),
-                    User::where('role', 'student')->count(),
-                ],
-            ],
+            // NEW
+            'activeUsersSeries' => $activeUsers,
+            'inactiveUsersSeries' => $inactiveUsers,
         ];
     }
 
@@ -234,4 +271,29 @@ class DashboardController extends Controller
 
         return $series;
     }
+
+    private function usersByRoleLast7Days()
+    {
+        $roles = ['admin', 'trainer', 'student'];
+        $data = [];
+
+        foreach ($roles as $role) {
+            $rows = User::where('role', $role)
+                ->where('created_at', '>=', now()->subDays(6)->startOfDay())
+                ->selectRaw("DATE(created_at) d, COUNT(*) c")
+                ->groupBy('d')
+                ->pluck('c', 'd');
+
+            $series = [];
+            for ($i = 6; $i >= 0; $i--) {
+                $day = now()->subDays($i)->toDateString();
+                $series[] = (int) ($rows[$day] ?? 0);
+            }
+
+            $data[$role] = $series;
+        }
+
+        return $data;
+    }
+
 }

@@ -151,29 +151,34 @@
             <div class="col-lg-8 mb-3">
               <div class="card chart-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                  <h4 class="mb-0">Weekly Activity</h4>
-                  <div class="card-header-action">
+                  <h4 class="mb-0">Users Data (Weekly) </h4>
+                  <!-- <div class="card-header-action">
                     {{-- ✅ FIXED: admin routes --}}
                     <a href="{{ route('admin.users.index') }}" class="btn btn-primary btn-sm">Users</a>
                     <a href="{{ route('admin.courses.index') }}" class="btn btn-info btn-sm">Courses</a>
-                  </div>
+                  </div> -->
                 </div>
                 <div class="card-body">
                   <div id="chart1" class="chart-box"></div>
-                  <div class="row mt-3 text-center">
-                    <div class="col-4">
-                      <div class="mini-muted">Users (7 days)</div>
-                      <div class="font-weight-bold">{{ array_sum($usersSeries ?? []) }}</div>
-                    </div>
-                    <div class="col-4">
-                      <div class="mini-muted">Courses (7 days)</div>
-                      <div class="font-weight-bold">{{ array_sum($coursesSeries ?? []) }}</div>
-                    </div>
-                    <div class="col-4">
-                      <div class="mini-muted">Total Trainers</div>
-                      <div class="font-weight-bold">{{ $totalTrainers ?? 0 }}</div>
-                    </div>
-                  </div>
+                  <div class="row text-center mt-3">
+  <div class="col">
+    <div class="mini-muted">Admins</div>
+    <div class="font-weight-bold">{{ $totalUsers - $totalTrainers - $totalStudents }}</div>
+  </div>
+  <div class="col">
+    <div class="mini-muted">Trainers</div>
+    <div class="font-weight-bold">{{ $totalTrainers }}</div>
+  </div>
+  <div class="col">
+    <div class="mini-muted">Students</div>
+    <div class="font-weight-bold">{{ $totalStudents }}</div>
+  </div>
+  <div class="col">
+    <div class="mini-muted">Total Users</div>
+    <div class="font-weight-bold">{{ $totalUsers }}</div>
+  </div>
+</div>
+
                 </div>
               </div>
             </div>
@@ -181,11 +186,10 @@
             <div class="col-lg-4 mb-3">
               <div class="card chart-card">
                 <div class="card-header">
-                  <h4 class="mb-0">Users by Role</h4>
+                  <h4 class="mb-0">Users (Active vs InActive)</h4>
                 </div>
                 <div class="card-body">
                   <div id="chart2" class="chart-sm"></div>
-                  <div class="mini-muted text-center mt-2">Current role distribution</div>
                 </div>
               </div>
             </div>
@@ -537,137 +541,64 @@
 @endsection
 
 @push('scripts')
-  <script src="{{ asset('assets/bundles/apexcharts/apexcharts.min.js') }}"></script>
+<script src="{{ asset('assets/bundles/apexcharts/apexcharts.min.js') }}"></script>
 
-  @php
-    $labels = $labels ?? [];
+<script>
+const labels = @json($labels);
+const usersByRole = @json($usersByRoleWeek);
 
-    // admin series (optional)
-    $usersSeries = $usersSeries ?? [];
-    $coursesSeries = $coursesSeries ?? [];
-
-    $rolePie = $rolePie ?? ['labels' => [], 'series' => []];
-    $roleWeekSeries = $roleWeekSeries ?? ['admin' => [], 'trainer' => [], 'student' => []];
-
-    $activeSeries = $activeSeries ?? [];
-    $inactiveSeries = $inactiveSeries ?? [];
-
-    // trainer series
-    $myCoursesSeries = $myCoursesSeries ?? [];
-    $myActiveCoursesSeries = $myActiveCoursesSeries ?? [];
-
-    $myEnrollSeries = $myEnrollSeries ?? [];
-
-    $myActiveEnrollSeries = $myActiveEnrollSeries ?? [];
-    $myInactiveEnrollSeries = $myInactiveEnrollSeries ?? [];
-  @endphp
-
-@push('scripts')
-  <script src="{{ asset('assets/bundles/apexcharts/apexcharts.min.js') }}"></script>
-
-  <script>
-    // ---------------- DATA ----------------
-    const labels = @json($labels ?? []);
-
-    const usersSeries = @json($usersSeries ?? []);
-    const coursesSeries = @json($coursesSeries ?? []);
-
-    const myCoursesSeries = @json($myCoursesSeries ?? []);
-    const myActiveCoursesSeries = @json($myActiveCoursesSeries ?? []);
-
-    const myEnrollSeries = @json($myEnrollSeries ?? []);
-
-    const myActiveEnrollSeries = @json($myActiveEnrollSeries);
-    const myInactiveEnrollSeries = @json($myInactiveEnrollSeries);
-
-    // ---------------- HELPERS ----------------
-    function renderNoData(el, text = 'No data available') {
-      if (!el) return;
-      el.innerHTML = `<div class="text-center text-muted py-4">${text}</div>`;
-    }
-
-    function hasAnyData(seriesInput) {
-      if (!seriesInput) return false;
-
-      // If array of numbers
-      if (Array.isArray(seriesInput) && seriesInput.every(v => typeof v !== 'object')) {
-        return seriesInput.some(v => Number(v) > 0);
-      }
-
-      // If array of arrays (multi series)
-      if (Array.isArray(seriesInput) && seriesInput.some(v => Array.isArray(v))) {
-        return seriesInput.flat().some(v => Number(v) > 0);
-      }
-
-      return false;
-    }
-
-    function safeRenderChart(elId, options, seriesCheck, noDataText) {
-      const el = document.querySelector(elId);
-      if (!el) return;
-
-      if (!hasAnyData(seriesCheck)) {
-        renderNoData(el, noDataText || 'No data available');
-        return;
-      }
-
-      try {
-        const chart = new ApexCharts(el, options);
-        chart.render();
-      } catch (e) {
-        console.error('Chart render error:', e);
-        renderNoData(el, 'Chart failed to load');
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-
-      // ---------------- TRAINER ----------------
-      safeRenderChart('#tchart1', {
-        chart: { type: 'area', height: 220, toolbar: { show: false } },
-        series: [{ name: 'My Courses', data: myCoursesSeries }],
-        xaxis: { categories: labels },
-        stroke: { curve: 'smooth', width: 3 },
-        dataLabels: { enabled: false },
-        grid: { strokeDashArray: 4 }
-      }, myCoursesSeries, 'No courses created in last 7 days');
-
-      // ✅ trainer 2nd chart different type (bar)
-      safeRenderChart('#tchart2', {
-        chart: { type: 'bar', height: 220, toolbar: { show: false } },
-        series: [{ name: 'My Active Courses', data: myActiveCoursesSeries }],
-        xaxis: { categories: labels },
-        plotOptions: { bar: { borderRadius: 6, columnWidth: '45%' } },
-        dataLabels: { enabled: false },
-        grid: { strokeDashArray: 4 }
-      }, myActiveCoursesSeries, 'No active courses created in last 7 days');
-
-
-      // ---------------- STUDENT ----------------
-      // schart1: My Enrollments (bar)
-      safeRenderChart('#schart1', {
-        chart: { type: 'bar', height: 220, toolbar: { show: false } },
-        series: [{ name: 'My Enrollments', data: myEnrollSeries }],
-        xaxis: { categories: labels },
-        plotOptions: { bar: { borderRadius: 6, columnWidth: '45%' } },
-        dataLabels: { enabled: false },
-        grid: { strokeDashArray: 4 }
-      }, myEnrollSeries, 'No enrollments in last 7 days');
-
-      // schart2: Users vs Courses (line comparison)
-      safeRenderChart('#schart2', {
-        chart: { type: 'line', height: 220, toolbar: { show: false } },
-        series: [
-          { name: 'Users', data: usersSeries },
-          { name: 'Courses', data: coursesSeries }
+if (usersByRole) {
+    new ApexCharts(document.querySelector("#chart1"), {
+        chart:{ type:'area', height:320 },
+        series:[
+            { name:'Admins', data: usersByRole.admin },
+            { name:'Trainers', data: usersByRole.trainer },
+            { name:'Students', data: usersByRole.student }
         ],
-        xaxis: { categories: labels },
-        stroke: { curve: 'smooth', width: 3 },
-        dataLabels: { enabled: false },
-        grid: { strokeDashArray: 4 },
-        legend: { position: 'top' }
-      }, [usersSeries, coursesSeries], 'No trend data available');
+        xaxis:{ categories: labels },
+        stroke:{ curve:'smooth', width:3 },
+        dataLabels:{ enabled:false },
+        legend:{ position:'top' },
+        tooltip: {
+  shared: true,
+  intersect: false,
+  y: {
+    formatter: function (val) {
+      return Math.round(val) + " users";
+    }
+  }
+}
+    }).render();
+}
 
-    });
-  </script>
+const activeUsers   = {{ $activeUsers ?? 0 }};
+const inactiveUsers = {{ $inactiveUsers ?? 0 }};
+
+if(activeUsers > 0 || inactiveUsers > 0){
+  new ApexCharts(document.querySelector("#chart2"), {
+  chart:{ type:'donut', height:300 },
+  series: [activeUsers, inactiveUsers],
+  labels: ['Active Users', 'Inactive Users'],
+  dataLabels: {
+    enabled: true,
+    formatter: function (val) {
+      return val.toFixed(1) + "%";
+    }
+  },
+  tooltip: {
+    y: {
+      formatter: function(val){
+        return val + " users";
+      }
+    }
+  },
+  legend: {
+    position: 'bottom'
+  }
+}).render();
+
+}
+</script>
+
 @endpush
+

@@ -190,6 +190,7 @@ function chart2() {
     chart.render();
 
 }
+
 function chart3() {
     var options = {
         chart: {
