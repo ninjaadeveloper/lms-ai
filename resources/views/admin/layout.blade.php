@@ -2,8 +2,6 @@
 <html lang="en">
 
 
-<!-- blank.html  21 Nov 2019 03:54:41 GMT -->
-
 <head>
   <meta charset="UTF-8">
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" name="viewport">
@@ -287,10 +285,10 @@
                     </li>
 
                     <!-- <li>
-                      <a class="nav-link" href="{{ route('admin.reports.type', 'users') }}">
-                        Users Reports
-                      </a>
-                    </li> -->
+                        <a class="nav-link" href="{{ route('admin.reports.type', 'users') }}">
+                          Users Reports
+                        </a>
+                      </li> -->
                   </ul>
                 </li>
 
@@ -302,22 +300,22 @@
                     <i data-feather="bar-chart-2"></i><span>Reports</span>
                   </a>
                   <ul class="dropdown-menu">
-    <li>
-        <a class="nav-link" href="{{ route('trainer.reports.type','courses') }}">
-            Courses Report
-        </a>
-    </li>
-    <li>
-        <a class="nav-link" href="{{ route('trainer.reports.type','students') }}">
-            Students Report
-        </a>
-    </li>
-    <li>
-        <a class="nav-link" href="{{ route('trainer.reports.type','quizzes') }}">
-            Quizzes Report
-        </a>
-    </li>
-</ul>
+                    <li>
+                      <a class="nav-link" href="{{ route('trainer.reports.type', 'courses') }}">
+                        Courses Report
+                      </a>
+                    </li>
+                    <li>
+                      <a class="nav-link" href="{{ route('trainer.reports.type', 'students') }}">
+                        Students Report
+                      </a>
+                    </li>
+                    <li>
+                      <a class="nav-link" href="{{ route('trainer.reports.type', 'quizzes') }}">
+                        Quizzes Report
+                      </a>
+                    </li>
+                  </ul>
 
                 </li>
               @endif

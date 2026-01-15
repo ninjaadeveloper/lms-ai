@@ -74,6 +74,38 @@
       color: #fff;
       background: #6777ef;
     }
+
+    #userChart {
+      height: 430px !important;
+    }
+
+    .quiz-card-body {
+      padding-top: 10px !important;
+      padding-bottom: 5px !important;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    /* Apex chart container extra gap remove */
+    #quizChart {
+      height: 370px !important;
+      margin-top: -10px;
+      margin-bottom: -20px;
+      /* 👈 this removes lower gap */
+    }
+
+    /* Legend ko tight karo */
+    #quizChart .apexcharts-legend {
+      margin-top: -10px !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+    }
+
+    /* SVG bottom whitespace */
+    #quizChart .apexcharts-svg {
+      overflow: visible !important;
+    }
   </style>
 
   <div class="main-content">
@@ -151,33 +183,28 @@
             <div class="col-lg-8 mb-3">
               <div class="card chart-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                  <h4 class="mb-0">Users Data (Weekly) </h4>
-                  <!-- <div class="card-header-action">
-                    {{-- ✅ FIXED: admin routes --}}
-                    <a href="{{ route('admin.users.index') }}" class="btn btn-primary btn-sm">Users</a>
-                    <a href="{{ route('admin.courses.index') }}" class="btn btn-info btn-sm">Courses</a>
-                  </div> -->
+                  <h4 class="mb-0">Users Data (Monthly) </h4>
                 </div>
                 <div class="card-body">
                   <div id="chart1" class="chart-box"></div>
                   <div class="row text-center mt-3">
-  <div class="col">
-    <div class="mini-muted">Admins</div>
-    <div class="font-weight-bold">{{ $totalUsers - $totalTrainers - $totalStudents }}</div>
-  </div>
-  <div class="col">
-    <div class="mini-muted">Trainers</div>
-    <div class="font-weight-bold">{{ $totalTrainers }}</div>
-  </div>
-  <div class="col">
-    <div class="mini-muted">Students</div>
-    <div class="font-weight-bold">{{ $totalStudents }}</div>
-  </div>
-  <div class="col">
-    <div class="mini-muted">Total Users</div>
-    <div class="font-weight-bold">{{ $totalUsers }}</div>
-  </div>
-</div>
+                    <div class="col">
+                      <div class="mini-muted">Admins</div>
+                      <div class="font-weight-bold">{{ $totalUsers - $totalTrainers - $totalStudents }}</div>
+                    </div>
+                    <div class="col">
+                      <div class="mini-muted">Trainers</div>
+                      <div class="font-weight-bold">{{ $totalTrainers }}</div>
+                    </div>
+                    <div class="col">
+                      <div class="mini-muted">Students</div>
+                      <div class="font-weight-bold">{{ $totalStudents }}</div>
+                    </div>
+                    <div class="col">
+                      <div class="mini-muted">Total Users</div>
+                      <div class="font-weight-bold">{{ $totalUsers }}</div>
+                    </div>
+                  </div>
 
                 </div>
               </div>
@@ -185,42 +212,67 @@
 
             <div class="col-lg-4 mb-3">
               <div class="card chart-card">
+
                 <div class="card-header">
-                  <h4 class="mb-0">Users (Active vs InActive)</h4>
+                  <h4 class="mb-0">Users (Active vs Inactive)</h4>
                 </div>
-                <div class="card-body">
-                  <div id="chart2" class="chart-sm"></div>
+
+                <div class="card-body justify-content-between" id="userChart">
+
+                  <!-- Donut Chart -->
+                  <div id="chart2" class="chart-sm mb-0"></div>
+
+                  <!-- One line summary -->
+                  <div class="row text-center mt-4">
+                    <div class="col-4">
+                      <small class="text-muted">Active</small>
+                      <div class="h5 text-success mb-0">{{ $activeUsers }}</div>
+                    </div>
+                    <div class="col-4">
+                      <small class="text-muted">Inactive</small>
+                      <div class="h5 text-danger mb-0">{{ $inactiveUsers }}</div>
+                    </div>
+                    <div class="col-4">
+                      <small class="text-muted">Total</small>
+                      <div class="h5 mb-0">{{ $totalUsers }}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+
           </div>
 
           {{-- ✅ 1 ROW: Courses Status + Role Distribution (Weekly) --}}
           <div class="row">
-            <div class="col-lg-6 mb-3">
+            <div class="col-lg-8 mb-3">
               <div class="card chart-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                  <h4 class="mb-0">Courses Status (Weekly)</h4>
-                  <span class="mini-muted">Created last 7 days</span>
+                <div class="card-header">
+                  <h4 class="mb-0">Courses (Weekly Active vs Inactive)</h4>
                 </div>
                 <div class="card-body">
-                  <div id="chart4" class="chart-sm"></div>
+                  <div id="courseChart" style="height:300px;"></div>
                 </div>
               </div>
             </div>
 
-            <div class="col-lg-6 mb-3">
+            <div class="col-lg-4 mb-3">
               <div class="card chart-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                  <h4 class="mb-0">Role Distribution (Weekly)</h4>
-                  <span class="mini-muted">New users per day by role</span>
+                <div class="card-header">
+                  <h4 class="mb-0">Quizzes Overview</h4>
                 </div>
-                <div class="card-body">
-                  <div id="chart3" class="chart-sm"></div>
+
+                <div class="card-body quiz-card-body">
+                  <div id="quizChart"></div>
                 </div>
               </div>
+
             </div>
+
+
+
           </div>
+
 
           {{-- TABLES --}}
           <div class="row">
@@ -366,20 +418,19 @@
           <div class="row">
             <div class="col-lg-6 mb-3">
               <div class="card chart-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                  <h4 class="mb-0">My Courses Created (7 days)</h4>
-                  <span class="mini-muted">Interactive</span>
+                <div class="card-header">
+                  <h4 class="mb-0">My Courses (Monthly)</h4>
                 </div>
                 <div class="card-body">
                   <div id="tchart1" class="chart-sm"></div>
                 </div>
               </div>
             </div>
+
             <div class="col-lg-6 mb-3">
               <div class="card chart-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                  <h4 class="mb-0">My Active Courses Created (7 days)</h4>
-                  <span class="mini-muted">Interactive</span>
+                <div class="card-header">
+                  <h4 class="mb-0">My Quizzes (Course wise)</h4>
                 </div>
                 <div class="card-body">
                   <div id="tchart2" class="chart-sm"></div>
@@ -387,6 +438,7 @@
               </div>
             </div>
           </div>
+
 
           <div class="card chart-card">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -473,20 +525,19 @@
           <div class="row">
             <div class="col-lg-6 mb-3">
               <div class="card chart-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                  <h4 class="mb-0">My Enrollments (7 days)</h4>
-                  <span class="mini-muted">Interactive</span>
+                <div class="card-header">
+                  <h4 class="mb-0">My Enrolled Courses (Monthly)</h4>
                 </div>
                 <div class="card-body">
                   <div id="schart1" class="chart-sm"></div>
                 </div>
               </div>
             </div>
+
             <div class="col-lg-6 mb-3">
               <div class="card chart-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">Active vs Inactive Enrollments (7 days)</h4>
-                <span class="mini-muted">My trend</span>
+                <div class="card-header">
+                  <h4 class="mb-0">My Quizzes (Monthly)</h4>
                 </div>
                 <div class="card-body">
                   <div id="schart2" class="chart-sm"></div>
@@ -494,6 +545,7 @@
               </div>
             </div>
           </div>
+
 
           <div class="card chart-card">
             <div class="card-header d-flex justify-content-between align-items-center">
@@ -541,64 +593,164 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/bundles/apexcharts/apexcharts.min.js') }}"></script>
+  <script src="{{ asset('assets/bundles/apexcharts/apexcharts.min.js') }}"></script>
 
-<script>
-const labels = @json($labels);
-const usersByRole = @json($usersByRoleWeek);
+  <script>
+    @if($role === 'admin')
+      const labels = @json($labels ?? []);
+      const usersByRole = @json($usersByRole ?? null);
 
-if (usersByRole) {
-    new ApexCharts(document.querySelector("#chart1"), {
-        chart:{ type:'area', height:320 },
-        series:[
-            { name:'Admins', data: usersByRole.admin },
-            { name:'Trainers', data: usersByRole.trainer },
-            { name:'Students', data: usersByRole.student }
-        ],
-        xaxis:{ categories: labels },
-        stroke:{ curve:'smooth', width:3 },
-        dataLabels:{ enabled:false },
-        legend:{ position:'top' },
-        tooltip: {
-  shared: true,
-  intersect: false,
-  y: {
-    formatter: function (val) {
-      return Math.round(val) + " users";
-    }
-  }
-}
-    }).render();
-}
-
-const activeUsers   = {{ $activeUsers ?? 0 }};
-const inactiveUsers = {{ $inactiveUsers ?? 0 }};
-
-if(activeUsers > 0 || inactiveUsers > 0){
-  new ApexCharts(document.querySelector("#chart2"), {
-  chart:{ type:'donut', height:300 },
-  series: [activeUsers, inactiveUsers],
-  labels: ['Active Users', 'Inactive Users'],
-  dataLabels: {
-    enabled: true,
-    formatter: function (val) {
-      return val.toFixed(1) + "%";
-    }
-  },
-  tooltip: {
-    y: {
-      formatter: function(val){
-        return val + " users";
+      if (usersByRole) {
+        new ApexCharts(document.querySelector("#chart1"), {
+          chart: { type: 'area', height: 320 },
+          series: [
+            { name: 'Admins', data: usersByRole.admin },
+            { name: 'Trainers', data: usersByRole.trainer },
+            { name: 'Students', data: usersByRole.student }
+          ],
+          xaxis: { categories: labels },
+          stroke: { curve: 'smooth', width: 3 },
+          dataLabels: { enabled: false },
+          tooltip: {
+            y: { formatter: v => Math.round(v) + " users" }
+          }
+        }).render();
       }
-    }
-  },
-  legend: {
-    position: 'bottom'
-  }
-}).render();
 
-}
-</script>
+      const activeUsers = {{ $activeUsers ?? 0 }};
+      const inactiveUsers = {{ $inactiveUsers ?? 0 }};
+
+      if (activeUsers > 0 || inactiveUsers > 0) {
+        new ApexCharts(document.querySelector("#chart2"), {
+          chart: { type: 'donut', height: 300 },
+          series: [activeUsers, inactiveUsers],
+          labels: ['Active Users', 'Inactive Users'],
+          dataLabels: {
+            enabled: true,
+            formatter: val => val.toFixed(1) + "%"
+          },
+          tooltip: {
+            y: { formatter: val => val + " users" }
+          },
+          legend: { position: 'bottom' }
+        }).render();
+      }
+
+      // Courses
+      const courseActive = @json($courseActive ?? []);
+      const courseInactive = @json($courseInactive ?? []);
+
+      new ApexCharts(document.querySelector("#courseChart"), {
+        chart: { type: 'bar', height: 300, stacked: true },
+        series: [
+          { name: 'Active Courses', data: courseActive },
+          { name: 'Inactive Courses', data: courseInactive }
+        ],
+        xaxis: { categories: labels }
+      }).render();
+
+      // Quizzes (ADMIN ONLY)
+      const quizLabels = @json($quizLabels ?? []);
+      const quizSeries = @json($quizSeries ?? []);
+
+      if (quizSeries.length > 0) {
+        new ApexCharts(document.querySelector("#quizChart"), {
+          chart: { type: 'donut', height: 360 },
+          series: quizSeries,
+          labels: quizLabels,
+          legend: { position: 'bottom' }
+        }).render();
+      }
+    @endif
+
+      @if($role === 'trainer')
+
+        const tlabels = @json($tlabels);
+
+        // Chart 1 — Courses (Admin style)
+        new ApexCharts(document.querySelector("#tchart1"), {
+          chart: { type: 'area', height: 260 },
+          series: [
+            { name: 'Active Courses', data: @json($tCourseActive) },
+            { name: 'Inactive Courses', data: @json($tCourseInactive) }
+          ],
+          xaxis: { categories: tlabels },
+          stroke: { curve: 'smooth', width: 3 },
+          dataLabels: { enabled: false }
+        }).render();
+
+        // Chart 2 — Quizzes (Trainer ke apne)
+        new ApexCharts(document.querySelector("#tchart2"), {
+          chart: { type: 'line', height: 260 },
+          series: [
+            { name: 'My Quizzes', data: @json($tQuizSeries) }
+          ],
+          xaxis: { categories: tlabels },
+          stroke: { curve: 'smooth', width: 3 },
+          markers: { size: 5 },
+          dataLabels: { enabled: false }
+        }).render();
+
+      @endif
+
+      @if($role === 'student')
+        const slabels = @json($slabels);
+        const schart1 = @json($schart1);
+        const schart2 = @json($schart2);
+
+        /* ================= LEFT : Enrolled Courses (AREA) ================= */
+        new ApexCharts(document.querySelector("#schart1"), {
+          chart: {
+            type: 'area',
+            height: 300,
+            toolbar: { show: false }
+          },
+          series: [{ name: 'Enrolled Courses', data: schart1 }],
+          colors: ['#6777ef'],
+          stroke: { curve: 'smooth', width: 3 },
+          fill: {
+            type: 'gradient',
+            gradient: {
+              shadeIntensity: 1,
+              opacityFrom: 0.4,
+              opacityTo: 0.05
+            }
+          },
+          markers: { size: 0 },
+          xaxis: { categories: slabels },
+          dataLabels: { enabled: false },
+          grid: { strokeDashArray: 4 },
+          tooltip: { y: { formatter: v => v + " courses" } }
+        }).render();
+
+
+        /* ================= RIGHT : My Quizzes (LINE) ================= */
+        new ApexCharts(document.querySelector("#schart2"), {
+          chart: {
+            type: 'line',
+            height: 300,
+            toolbar: { show: false }
+          },
+          series: [{ name: 'My Quizzes', data: schart2 }],
+          colors: ['#1e88ff'],
+          stroke: { curve: 'smooth', width: 3 },
+          markers: {
+            size: 6,
+            colors: ['#1e88ff'],
+            strokeColors: '#fff',
+            strokeWidth: 2,
+            hover: { size: 8 }
+          },
+          xaxis: { categories: slabels },
+          dataLabels: { enabled: false },
+          grid: { strokeDashArray: 4 },
+          tooltip: { y: { formatter: v => v + " quizzes" } }
+        }).render();
+      @endif
+
+
+
+
+  </script>
 
 @endpush
-
