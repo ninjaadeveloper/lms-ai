@@ -1,5 +1,4 @@
 <?php
-use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Admin\DashboardController;
@@ -14,7 +13,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Trainer\ReportController as TrainerReportController;
 use App\Http\Controllers\AuthController;
-
+use App\Http\Controllers\RegisterController;
 
 // ---------------- AUTH ----------------
 // Route::get('/', fn() => redirect()->route('login'));

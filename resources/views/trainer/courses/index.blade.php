@@ -21,7 +21,7 @@
         <div class="card">
           <div class="card-body text-center py-5">
             <h6 class="mb-1">No courses found</h6>
-            <small class="text-muted">Abhi aapko koi course assign nahi hua.</small>
+            <small class="text-muted">No course has been assigned to you yet.</small>
           </div>
         </div>
       @else

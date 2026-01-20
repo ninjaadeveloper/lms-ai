@@ -209,6 +209,48 @@
             box-shadow: none !important;
             background: transparent;
         }
+
+        .auth-error {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            background: #ffe4e6;
+            border: 1px solid #fecdd3;
+            color: #9f1239;
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            animation: fadeIn .3s ease-in-out;
+        }
+
+        .auth-error .error-icon {
+            font-size: 20px;
+            margin-top: 2px;
+        }
+
+        .auth-error .error-text strong {
+            display: block;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .auth-error .error-text p {
+            margin: 2px 0 0;
+            font-size: 13px;
+            color: #7f1d1d;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 
 </head>
@@ -259,33 +301,60 @@
             <div class="auth-right">
                 <div class="form-wrap">
 
-                    <h2 class="welcome">Welcome Back</h2>
+                    <h2 class="welcome text-dark">Welcome Back</h2>
                     <p class="welcome-sub">Login to your dashboard</p>
 
                     <form method="POST" action="{{ route('login.post') }}">
                         @csrf
 
-                        <label class="field-label">Email</label>
-                        <div class="inputx mb-3">
-                            <input type="email" name="email" placeholder="Enter email" required>
+                        @if(session('error'))
+                            <div class="auth-error">
+                                <div class="error-icon">⚠️</div>
+                                <div class="error-text">
+                                    <strong>Login Failed</strong>
+                                    <p>{{ session('error') }}</p>
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- EMAIL --}}
+                        <div class="mb-3">
+                            <label class="field-label">Email</label>
+                            <div class="inputx @error('email') is-invalid @enderror">
+                                <input type="email" name="email" value="{{ old('email') }}" placeholder="Enter email"
+                                    required>
+                            </div>
+
+                            @error('email')
+                                <div class="text-danger mt-1" style="font-size:13px;">
+                                    {{ $message }}
+                                </div>
+                            @enderror
                         </div>
 
+                        {{-- PASSWORD --}}
                         <div class="mb-3">
                             <label class="field-label">Password</label>
 
-                            <div class="inputx">
+                            <div class="inputx @error('password') is-invalid @enderror">
                                 <input id="password" type="password" name="password" placeholder="Enter your password"
                                     required>
 
-                                <button type="button" class="toggle-pass" onclick="togglePassword()"
-                                    aria-label="Toggle password">
+                                <button type="button" class="toggle-pass" onclick="togglePassword()">
                                     👁️
                                 </button>
                             </div>
+
+                            @error('password')
+                                <div class="text-danger mt-1" style="font-size:13px;">
+                                    {{ $message }}
+                                </div>
+                            @enderror
                         </div>
 
-
-                        <button class="btn-login">Login</button>
+                        <button class="btn-login" type="submit">
+                            Login
+                        </button>
 
                         <div class="bottom-links">
                             <p>
@@ -295,6 +364,7 @@
                             <a href="{{ route('index') }}">← Back to Home</a>
                         </div>
                     </form>
+
 
                 </div>
             </div>
