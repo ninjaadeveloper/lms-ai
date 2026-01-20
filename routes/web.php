@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Admin\DashboardController;
@@ -16,11 +17,23 @@ use App\Http\Controllers\AuthController;
 
 
 // ---------------- AUTH ----------------
-Route::get('/', fn() => redirect()->route('login'));
+// Route::get('/', fn() => redirect()->route('login'));
+
+Route::get('/', function () {
+    return view('index');
+})->name('index');
+
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/register', function () {
+    return view('auth.register');
+})->name('register');
+
+Route::post('/register', [RegisterController::class, 'store'])
+    ->name('register.store');
 
 // ---------------- COMMON (ALL ROLES) ----------------
 Route::middleware(['auth'])->group(function () {
