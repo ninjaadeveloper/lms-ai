@@ -285,10 +285,10 @@
                     </li>
 
                     <!-- <li>
-                        <a class="nav-link" href="{{ route('admin.reports.type', 'users') }}">
-                          Users Reports
-                        </a>
-                      </li> -->
+                          <a class="nav-link" href="{{ route('admin.reports.type', 'users') }}">
+                            Users Reports
+                          </a>
+                        </li> -->
                   </ul>
                 </li>
 
@@ -331,6 +331,16 @@
                   <i data-feather="message-square"></i><span>Feedback</span>
                 </a>
               </li>
+
+              {{-- CONTACT MESSAGES (ADMIN ONLY) --}}
+              @if($role === 'admin')
+                <li class="{{ request()->routeIs('admin.contacts.*') ? 'active' : '' }}">
+                  <a class="nav-link" href="{{ route('admin.contacts.index') }}">
+                    <i data-feather="mail"></i>
+                    <span>Contact Messages</span>
+                  </a>
+                </li>
+              @endif
 
               {{-- Settings --}}
               <li class="dropdown {{ request()->routeIs('profile.*', 'password.*') ? 'active' : '' }}">

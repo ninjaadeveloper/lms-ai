@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ config('app.name', 'LMS AI') }}</title>
+    <title>LMS-AI</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -455,7 +455,7 @@
                 <!-- LEFT INFO -->
                 <div class="reveal">
                     <h3 style="font-weight:900;margin-bottom:10px;">
-                        Let’s talk about your project
+                        Let’s talk about <span style="color:var(--purple2">Lms-AI</span>
                     </h3>
 
                     <p class="sub" style="max-width:500px;">
@@ -494,23 +494,35 @@
 
                 <!-- RIGHT FORM -->
                 <div class="cardx reveal delay-1">
-                    <form class="formx">
+                    @if(session('success'))
+                        <div class="auth-success" id="successBox">
+                            <span class="msg">✅ {{ session('success') }}</span>
+                            <button type="button" class="close-btn" onclick="closeAlert()">×</button>
+                        </div>
+                    @endif
+                    <form class="formx" method="POST" action="{{ route('contact.store') }}">
+                        @csrf
 
                         <div style="display:grid; gap:14px;">
 
                             <div>
                                 <label>Name</label>
-                                <input type="text" placeholder="Your name" required>
+                                <input type="text" placeholder="Your name" required pattern="[a-zA-Z ]{3,30}"
+                                    name="name">
                             </div>
 
                             <div>
                                 <label>Email</label>
-                                <input type="email" placeholder="you@example.com" required>
+                                <input type="email" placeholder="you@example.com" required name="email">
                             </div>
 
                             <div>
                                 <label>Message</label>
-                                <textarea rows="5" placeholder="Write your message..." required></textarea>
+                                <textarea name="message" rows="5" maxlength="300" placeholder="Write your message..."
+                                    required oninput="updateCounter(this)"></textarea>
+
+                                <small id="charCount" style="color:#888;">0 / 300</small>
+
                             </div>
 
                             <button class="btnx primary" type="submit" style="width:fit-content;">
@@ -581,6 +593,21 @@
             window.addEventListener("scroll", activateMenu);
             activateMenu(); // page load par bhi
         });
+
+        function closeAlert() {
+            const el = document.getElementById('successBox');
+            if (el) {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(-5px)';
+                setTimeout(() => el.remove(), 250);
+            }
+        }
+        function updateCounter(el) {
+            const max = el.getAttribute("maxlength");
+            const current = el.value.length;
+            document.getElementById("charCount").innerText =
+                `${current} / ${max}`;
+        }
     </script>
 
 </body>

@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Trainer\ReportController as TrainerReportController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\ContactController;
 
 // ---------------- AUTH ----------------
 // Route::get('/', fn() => redirect()->route('login'));
@@ -33,6 +34,9 @@ Route::get('/register', function () {
 
 Route::post('/register', [RegisterController::class, 'store'])
     ->name('register.store');
+
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+
 
 // ---------------- COMMON (ALL ROLES) ----------------
 Route::middleware(['auth'])->group(function () {
@@ -114,7 +118,7 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/ai-assistant', [AiAssistantController::class, 'index'])->name('ai.index');
         Route::post('/ai-assistant/send', [AiAssistantController::class, 'send'])->name('ai.send');
 
-        // Feedback (ADMIN)
+        // Feedback 
         Route::get('/feedback-list', [FeedbackController::class, 'adminIndex'])->name('feedback.admin');
         Route::get('/feedback/{feedback}', [FeedbackController::class, 'adminShow'])->name('feedback.show');
         Route::patch('/feedback/{feedback}/status', [FeedbackController::class, 'updateStatus'])->name('feedback.status');
@@ -133,6 +137,12 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/reports/{type}/export/pdf', [AdminReportController::class, 'exportPdf'])
             ->whereIn('type', ['quiz', 'courses', 'trainers', 'students', 'users'])
             ->name('reports.export.pdf');
+
+        Route::get('/contacts', [ContactController::class, 'index'])
+            ->name('contacts.index');
+
+        Route::get('/contacts/{contact}', [ContactController::class, 'show'])
+            ->name('contacts.show');
     });
 
 // ---------------- TRAINER ----------------

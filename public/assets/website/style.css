@@ -759,3 +759,40 @@ body {
 .nav-item>a {
     font-weight: 600;
 }
+
+
+.auth-success {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: #ecfdf5;
+    border: 1px solid #6ee7b7;
+    color: #065f46;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    animation: fadeIn .4s ease;
+}
+
+.auth-success .close-btn {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #065f46;
+    line-height: 1;
+    transition: .2s;
+}
+
+.auth-success .close-btn:hover {
+    color: #dc2626;
+    transform: scale(1.1);
+}
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(-6px);}
+    to {opacity: 1; transform: translateY(0);}
+}
