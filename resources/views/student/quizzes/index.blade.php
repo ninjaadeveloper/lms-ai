@@ -61,10 +61,12 @@
                           @endif
                         </td>
                         <td class="text-center" onclick="event.stopPropagation();">
+                         
+                          @if(!$done)
                           <a class="btn btn-sm btn-info" href="{{ route('student.quizzes.show', $quiz->id) }}">
                             <i class="fas fa-play"></i> Start
                           </a>
-                          @if($done)
+                          @else
                             <a class="btn btn-sm btn-primary" href="{{ route('student.quizzes.result', $quiz->id) }}">
                               <i class="fas fa-chart-bar"></i> Result
                             </a>

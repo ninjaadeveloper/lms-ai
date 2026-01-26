@@ -17,7 +17,7 @@
   <div class="muted">Course: <b>{{ $quiz->course->title ?? '-' }}</b></div>
   <div class="muted">Topic: <b>{{ $quiz->topic ?? '-' }}</b></div>
   <div class="muted">Score: <b>{{ $attempt->score_percent ?? 0 }}%</b></div>
-  <div class="muted">Submitted: <b>{{ optional($attempt->submitted_at)->format('d M Y, h:i A') }}</b></div>
+  <div class="muted">Submitted: <b>{{ optional($attempt->submitted_at)->format('d M Y') }}</b></div>
 
   <table>
     <thead>

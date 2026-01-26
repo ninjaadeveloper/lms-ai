@@ -65,7 +65,7 @@
 
             <div class="card-footer d-flex justify-content-between align-items-center">
               <small class="text-muted">Once submitted, you can view result.</small>
-              <button type="submit" class="btn btn-success">
+              <button type="submit" class="btn btn-success" onclick="return confirm('Are you want to submit this quiz.')">
                 <i class="fas fa-paper-plane mr-1"></i> Submit Quiz
               </button>
             </div>

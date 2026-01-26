@@ -46,7 +46,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Generate how many MCQs?</label>
+                                    <label>Number of MCQs?</label>
                                     <input id="count" type="number" class="form-control" min="1" max="20" value="10">
                                     <small class="text-muted">You can generate up to 20, but you can select only max 10 to
                                         save.</small>
@@ -79,6 +79,7 @@
                                     <table class="table table-striped mb-0">
                                         <thead>
                                             <tr>
+
                                                 <th style="width:60px;">Pick</th>
                                                 <th>Question</th>
                                             </tr>
@@ -145,22 +146,22 @@
             body.innerHTML = pool.map((q, idx) => {
                 const checked = selectedIds.has(q.id) ? 'checked' : '';
                 return `
-                            <tr>
-                              <td class="text-center">
-                                <input type="checkbox" class="pick" data-id="${q.id}" ${checked}/>
-                              </td>
-                              <td>
-                                <div class="font-weight-bold">${idx + 1}. ${escapeHtml(q.question)}</div>
-                                <div class="text-muted mt-2">
-                                  <div><strong>A:</strong> ${escapeHtml(q.A)}</div>
-                                  <div><strong>B:</strong> ${escapeHtml(q.B)}</div>
-                                  <div><strong>C:</strong> ${escapeHtml(q.C)}</div>
-                                  <div><strong>D:</strong> ${escapeHtml(q.D)}</div>
-                                  <div class="mt-1"><span class="badge badge-light">Answer: ${escapeHtml(q.answer)}</span></div>
-                                </div>
-                              </td>
-                            </tr>
-                          `;
+                                                            <tr>
+                                                              <td class="text-center">
+                                                                <input type="checkbox" class="pick" data-id="${q.id}" ${checked}/>
+                                                              </td>
+                                                              <td>
+                                                                <div class="font-weight-bold">${idx + 1}. ${escapeHtml(q.question)}</div>
+                                                                <div class="text-muted mt-2">
+                                                                  <div><strong>A:</strong> ${escapeHtml(q.A)}</div>
+                                                                  <div><strong>B:</strong> ${escapeHtml(q.B)}</div>
+                                                                  <div><strong>C:</strong> ${escapeHtml(q.C)}</div>
+                                                                  <div><strong>D:</strong> ${escapeHtml(q.D)}</div>
+                                                                  <div class="mt-1"><span class="badge badge-light">Answer: ${escapeHtml(q.answer)}</span></div>
+                                                                </div>
+                                                              </td>
+                                                            </tr>
+                                                          `;
             }).join('');
 
             document.querySelectorAll('.pick').forEach(cb => {
